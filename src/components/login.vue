@@ -123,7 +123,20 @@
         })
       },
       getVerCode() {
-        this.vcodeImg = '/api/getVerCode?w=86&h=35&date=' + new Date().getTime();
+        let _this = this;
+        this.$http({
+          method: 'get',
+          url: '/getVerCodeUrl',
+        })
+        .then(response => {
+          let data = JSON.parse(response.data);
+          if(data.isSuccess){
+            this.vcodeImg = '/api'+data.url+'?w=100&h=35&date='+new Date().getTime();
+          }
+        })
+        .catch(error => {
+          _this.loading = false;
+        })
       },
       login() {
         let _this = this;
@@ -144,7 +157,7 @@
           }else{
             _this.tipMessage = data.msg;
             if(data.code=='10002'){
-              _this.vcodeImg = '/api/getVerCode?w=86&h=35&date=' + new Date().getTime();
+              _this.vcodeImg = '/api/getVerCode?w=86&h=35&date='+ new Date().getTime();
             }
             _this.Modal=true;
           }
