@@ -32,7 +32,7 @@
         <p>{{tipMessage}}</p>
       </div>
       <div slot="footer">
-        <Button type="error" long @click="Modal=false">确定asda阿斯达所</Button>
+        <Button type="error" long @click="Modal=false">确定</Button>
       </div>
     </Modal>
   </div>
