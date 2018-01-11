@@ -1,0 +1,122 @@
+@bg-head:#fff; //头部条颜色
+@bg-index:#050503; //首页背景色
+@bg-nav:#d00808; //导航条颜色
+.index .content{
+  width: 1000px;
+  height: 620px;
+  margin: 0 auto 50px auto;
+  background: url('../../../static/img/index/banner.png') no-repeat;
+  position: relative;
+  background-position: center top;
+  .recommend{
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 320px;
+    background: url('../../../static/img/index/hot_bg.png') no-repeat;
+    padding: 40px;
+    justify-content: space-between;
+  }
+}
+.recommend_tag{
+  width: 200px;
+  height: 30px;
+  position: absolute;
+  left: 50%;
+  margin-left: -100px;
+  background: url('../../../static/img/index/index_bg.png') no-repeat;
+  background-position: -18px -155px;
+  text-align: center;
+  line-height: 30px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+}
+.silder_left_box{
+  width: 575px;
+  height: 100%;
+  background: #1e1e1e;
+  position: relative;
+  border: 3px solid #520100;
+  .more_bar{
+    width: 92%;
+    height: 20px;
+    margin: 0 auto;
+    background: #151515;
+    text-align: right;
+    line-height: 20px;
+    padding: 0 10px;
+  }
+}
+.silder_left_warp{
+  height: 100%;
+  height: 100%;
+  border: 2px solid #c12729;
+  padding: 9px 0;
+  .slider-panel{
+    margin-top: 25px;
+  }
+} 
+.more_bar>a{
+  color: #da0207;
+}
+.more_bar>a:hover{
+  color: #ff0006;
+}
+.silder_right_box{
+  width: 295px;
+  height: 100%;
+  background: #1e1e1e;
+  border: 3px solid #520100;
+  position: relative;
+}
+.silder_right_warp{
+  height: 100%;
+  height: 100%;
+  border: 2px solid #c12729;
+  .slider-panel{
+    background: #151515;
+    width: 260px;
+    height: 170px;
+    margin: 0 auto;
+    margin-top:50px;
+    padding: 10px;
+    overflow: hidden;
+  }
+  .slider-panel .flex{
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+} 
+.silder_right_warp .slider-panel .flex>p:nth-child(1){
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #ffef00;
+  color: #161415;
+  text-align: center;
+  line-height: 20px;
+  margin-right: 10px;
+}
+.silder_right_warp .slider-panel .flex>p:nth-child(2){
+  height: 20px;
+  color: #cc0407;
+  text-align: center;
+  line-height: 20px;
+  margin-right: 55px;
+}
+.silder_right_warp .slider-panel .flex>p:nth-child(3){
+  height: 20px;
+  color: #ffef00;
+  text-align: center;
+  line-height: 20px;
+}
+.silder_right_warp .slider-panel .flex>p:nth-child(3)>span{
+  height: 20px;
+  color: #cc0407;
+  text-align: center;
+  line-height: 20px;
+}
+.el-carousel__item{
+  background: #c12729;
+}
