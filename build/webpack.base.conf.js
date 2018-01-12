@@ -92,7 +92,7 @@ let webpackConfig = {
   plugins:[
     new webpack.optimize.CommonsChunkPlugin({  //抽离引用的第三方类库  避免打包在入口文件中太大
       name:['flipclock','jquery',],
-      filename:'assets/js/[name].min.js',
+      filename:'static/assets/js/[name].min.js',
       minChunks:2
     }),
     new webpack.ProvidePlugin({

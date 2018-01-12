@@ -1,0 +1,39 @@
+.lottery_time {
+  min-height: 562px;
+  .ivu-table-wrapper{
+    border: 1px solid #b2b2b2;
+    .ivu-table{
+      &:before{
+        height: 0;
+      }
+      &:after{
+        width: 0;
+      }
+      table{
+        width: 100%!important;
+        tr{
+          th{
+            background-color: #c7c7c7;
+            text-align: center;
+            height: 34px;
+          }
+          td{
+            text-align: center;
+            height: 34px;
+            border-bottom: 1px solid #b2b2b2;
+          }
+          &:nth-last-child(1){
+            td{
+              border-bottom: none;
+            }
+          }
+        }
+      }
+    }
+    .ivu-table-cell{
+      padding: 0;
+    }
+  }
+}
+
+

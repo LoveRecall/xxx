@@ -1,0 +1,216 @@
+.withdrawal_wrapper {
+  table{
+    border-collapse: collapse;
+    border-spacing: 0;
+    width: 100%;
+    table-layout: fixed;
+    text-align: center;
+  }
+  .ivu-tabs-bar {
+    height: 32px;
+    background-color: #ffffff;
+    border: 1px solid #b2b2b2;
+    margin-bottom: 10px;
+    position: relative;
+    .ivu-tabs-nav-container{
+      height: 32px;
+      position: absolute!important;
+      top: -1px;
+      left: -1px;
+      .ivu-tabs-nav-wrap {
+        margin-bottom: 0;
+        .ivu-tabs-ink-bar {
+          display: none !important;
+        }
+        .ivu-tabs-nav {
+          .ivu-tabs-tab {
+            width: 78px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            color: #495060;
+            padding: 0;
+            margin: 0;
+            border-left: 1px solid #b2b2b2;
+            border-right: 1px solid #b2b2b2;
+            &:hover {
+              color: #fe0000;
+            }
+            &:nth-child(3) {
+              width: 118px;
+              margin-left: -1px;
+            }
+            &:nth-child(4) {
+              width: 98px;
+              margin-left: -1px;
+            }
+          }
+          .ivu-tabs-tab-active {
+            color: #fe0000;
+            border: 1px solid #fe0000!important;
+            z-index: 2;
+          }
+        }
+      }
+    }
+
+  }
+  .ivu-tabs-content {
+    min-height: 688px;
+    background-color: #ffffff;
+    border: 1px solid #b2b2b2;
+    .withdrawal {
+      padding: 28px 42px 100px 26px;
+      .info_list {
+        div {
+          margin-bottom: 24px;
+        }
+        .amount {
+          display: inline-block;
+          margin-bottom: 50px;
+          .red_text {
+            color: #d00808;
+            font-size: 18px;
+            vertical-align: middle;
+          }
+        }
+        .info_lable {
+          display: inline-block;
+          width: 90px;
+          text-align: right;
+        }
+      }
+      .ivu-form {
+        .ivu-form-item-label {
+          padding-right: 0;
+          font-size: 14px;
+        }
+        .submit_btn {
+          background: url('../../../../static/img/index/index_bg.png') no-repeat;
+          background-position: -212px -28px;
+          width: 72px;
+          height: 30px;
+          text-align: center;
+          line-height: 30px;
+          cursor: pointer;
+          color: #fff;
+        }
+        .amount_tip {
+          display: inline-block;
+          padding-left: 6px;
+          font-size: 14px;
+          .red_text {
+            color: #fe0000;
+          }
+        }
+      }
+      td {
+        height: 34px;
+        border: 1px solid #b2b2b2;
+      }
+      .remind {
+        margin: 26px 0 14px;
+        color: #d00808;
+      }
+    }
+    .progress {
+      padding: 20px 10px 26px;
+      .progress_instructions {
+        padding-left: 14px;
+      }
+      .hide_btn {
+        display: inline-block;
+        background: url('../../../../static/img/user_center/hidden_btn.png') no-repeat center;
+        width: 150px;
+        height: 26px;
+        text-align: center;
+        line-height: 26px;
+        cursor: pointer;
+        color: #fff;
+        margin: 20px 12px 10px 0;
+      }
+      td {
+        height: 34px;
+        border: 1px solid #b2b2b2;
+      }
+      .audit_wrapper {
+        vertical-align: middle;
+        padding-left: 14px;
+        padding-top: 22px;
+        div {
+          line-height: 20px;
+          vertical-align: middle;
+          .red_text {
+            color: #fe0000;
+          }
+          &:nth-child(3) {
+            width: 350px;
+            height: 24px;
+            line-height: 24px;
+            color: #030502;
+            background-color: #feef00;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+          }
+        }
+
+      }
+    }
+    .bills {
+      .ivu-form {
+        padding: 20px 0 20px 14px;
+        .ivu-form-item {
+          margin-bottom: 0;
+          .ivu-date-picker{
+            .ivu-icon:before{
+              content: '';
+            }
+          }
+          .query_btn {
+            background: url('../../../../static/img/index/index_bg.png') no-repeat;
+            background-position: -212px -28px;
+            width: 72px;
+            height: 30px;
+            margin-top: 2px;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+            color: #fff;
+          }
+        }
+      }
+      .ivu-table-wrapper {
+        border: none;
+        .ivu-table {
+          color: #050505;
+          &:before {
+            height: 0;
+          }
+          &:after {
+            width: 0;
+          }
+          table {
+            width: 100% !important;
+            th {
+              background-color: #c7c7c7;
+              border-top: 1px solid #b2b2b2;
+              text-align: center;
+              height: 34px;
+            }
+            td {
+              text-align: center;
+              height: 34px;
+              border-bottom: 1px solid #b2b2b2;
+            }
+          }
+        }
+        .ivu-table-cell {
+          padding: 0;
+        }
+      }
+    }
+  }
+}
+
+

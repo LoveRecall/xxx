@@ -8,6 +8,7 @@ import 'iview/dist/styles/iview.css';    // 使用 CSS
 import axios from 'axios';
 import app from './axios.config';
 
+//配置WebSocket
 const transformRequest = function (data) {
   let ret = ''
   for (let it in data) {

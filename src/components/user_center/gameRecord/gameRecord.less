@@ -1,0 +1,61 @@
+.gameRecord{
+  min-height: 562px;
+  .ivu-form{
+    .ivu-date-picker{
+      .ivu-icon:before{
+        content: '';
+      }
+    }
+    .ivu-select{
+      .ivu-icon:before{
+        color: #c81518;
+      }
+    }
+  }
+  .ivu-table-wrapper{
+    border: 1px solid #b2b2b2;
+    .ivu-table{
+      color: #050505;
+      &:before{
+        height: 0;
+      }
+      &:after{
+        width: 0;
+      }
+      table{
+        width: 100%!important;
+        tr{
+          th{
+            background-color: #c7c7c7;
+            text-align: center;
+            height: 34px;
+          }
+          td{
+            text-align: center;
+            height: 34px;
+            border-bottom: 1px solid #b2b2b2;
+          }
+          &:nth-last-child(1){
+            td{
+              border-bottom: none;
+            }
+          }
+        }
+      }
+    }
+    .ivu-table-cell{
+      padding: 0;
+    }
+  }
+}
+.query_btn{
+  background: url('../../../../static/img/index/index_bg.png') no-repeat;
+  background-position: -212px -28px;
+  width: 72px;
+  height: 30px;
+  margin-top: 2px;
+  text-align: center;
+  line-height: 30px;
+  cursor: pointer;
+  color: #fff;
+}

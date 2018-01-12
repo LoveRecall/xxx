@@ -4,12 +4,18 @@ import Router from 'vue-router'
 Vue.use(Router)
 
 const router = new Router;
-const vue = new Vue;
+
+import { Message } from 'iview'
+Vue.use(Message)
+
+const baseURL = '/api';
+
+Vue.prototype.$baseURL = baseURL;
 
 // 拦截request,设置全局请求为ajax请求
 axios.interceptors.request.use((config) => {
   config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
-  config.baseURL = '/api';
+  config.baseURL = baseURL;
   return config
 })
 
@@ -17,7 +23,7 @@ axios.interceptors.request.use((config) => {
 axios.interceptors.response.use((response) => {
   const data = response.data
   // 根据返回的code值来做不同的处理（和后端约定）
-  // switch (data.code) {
+  // switch (data.code) {ffwF
   //   case '0':
   //     // 举例
   //     // exp: 修复iPhone 6+ 微信点击返回出现页面空白的问题
@@ -66,7 +72,7 @@ axios.interceptors.response.use((response) => {
     switch (err.response.status) {
       case 481:
         err.message = '登录失效，请重新登陆';
-        vue.$Message.warning({
+        Message.warning({
           content:err.message,
           duration:3,
           onClose:function(){

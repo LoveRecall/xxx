@@ -18,7 +18,16 @@ module.exports = {
         pathRewrite: {
           '^/api': ''
         }
-      }
+      },
+      // '/wss':{
+      //   target:'http://192.168.0.86:8080',
+      //   pathRewrite: {
+      //     '^/wss': ''
+      //   },
+      //   changeOrigin: true,
+      //   ws:true,
+      //   logLevel: 'debug'
+      // }
     },
 
     // Various Dev Server settings

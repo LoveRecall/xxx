@@ -9,9 +9,8 @@
             <span class="vertical-m" style="color:#d00808;">123456</span>    
           </div>
           <div class="right">
-            <i style="color:#d00808;" class="iconfont icon-icon165 vertical-m"></i>
-            <span class="vertical-m" style="color:#050503">下午</span>    
-            <span class="vertical-m">02:30</span>    
+            <i style="color:#d00808;" class="iconfont icon-icon165 vertical-m"></i>   
+            <span class="vertical-m" v-text="hourFun"></span>    
           </div>
           <div class="clear"></div>
         </div>
@@ -82,6 +81,7 @@
   export default {
     data() {
       return {
+        test:'<i>asdasdasd</i>',
         Modal:false,
         acctAmt:0,
         tipMessage:'是否要退出',
@@ -96,11 +96,47 @@
       }
     },
     computed: {
-
+      hourFun(){
+        let date = new Date(),
+        hour = date.getHours() < 10 ? "0" + date.getHours() : date.getHours(),
+        minute  = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+        let span='';
+        if(hour < 6){span="凌晨"} 
+        else if (hour < 9){span="早上"+hour+':'+minute } 
+        else if (hour < 12){span="上午"+hour+':'+minute } 
+        else if (hour < 14){span="中午"+hour+':'+minute } 
+        else if (hour < 17){span="下午"+hour+':'+minute } 
+        else if (hour < 19){span="傍晚"+hour+':'+minute } 
+        else if (hour < 22){span="晚上"+hour+':'+minute } 
+        return span;
+      }
     },
     mounted(){
       this.getNotice();
-      this.getAcct();
+      this.getAcct();  
+      let _this = this;   
+      let ws = new WebSocket('ws://192.168.0.86:8080/webSocketServer?custNo='+sessionStorage.getItem('custNo'));
+      ws.onopen = function (evt) {
+        //已经建立连接
+        console.log('已经建立连接')
+      }; 
+      ws.onclose = function (evt) {
+        //已经关闭连接
+        console.log('已经关闭连接')
+      };
+      ws.onmessage = function (evt) {
+        console.log('收到消息')
+        _this.$Notice.warning({
+          title:'asdasd',
+          desc:'asdadasd',
+          duration:0,
+          onClose:function(){}
+        })
+      };
+      ws.onerror = function (evt) {
+        //产生异常
+        console.log('产生异常')
+      }; 
     },
     methods: {
        //退出登录

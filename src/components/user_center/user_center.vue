@@ -5,7 +5,7 @@
         <div class="left-menu-line">
           <Menu width="auto" @on-select="GoRouter" accordion>
             <MenuItem name="recharge">充值</MenuItem>
-            <MenuItem name="extractNow">提现</MenuItem>
+            <MenuItem name="withdrawal">提现</MenuItem>
             <Submenu name="2">
               <template slot="title">
                 报表管理
@@ -18,18 +18,22 @@
               <template slot="title">
                 游戏记录
               </template>
-              <MenuItem name="3-1">购彩查询</MenuItem>
-              <MenuItem name="3-2">追号查询</MenuItem>
+              <MenuItem :class="[($route.name=='buyQuery' ? 'active' : '')]" name="buyQuery">购彩查询</MenuItem>
+              <MenuItem :class="[($route.name=='trackQuery' ? 'active' : '')]" name="trackQuery">追号查询</MenuItem>
             </Submenu>
             <Submenu name="4">
               <template slot="title">
                 账户管理
               </template>
-              <MenuItem name="4-1">个人总览</MenuItem>
-              <MenuItem name="4-2">用户资料</MenuItem>
-              <MenuItem name="4-3">密码修改</MenuItem>
-              <MenuItem name="4-4">密保设定</MenuItem>
-              <MenuItem name="4-5">银行卡管理</MenuItem>
+              <MenuItem :class="[($route.name=='personalOverview' ? 'active' : '')]" name="personalOverview">个人总览</MenuItem>
+              <MenuItem :class="[($route.name=='userInfo' ? 'active' : '')]" name="userInfo">用户资料</MenuItem>
+              <MenuItem :class="[($route.name=='changePassword' ? 'active' : '')]" name="changePassword">密码修改</MenuItem>
+              <MenuItem :class="[($route.name=='securitySettings' ? 'active' : '')]" name="securitySettings">密保设定</MenuItem>
+              <MenuItem :class="[
+              ($route.name=='bankCardManage'||
+              $route.name=='addBank' ||
+              $route.name=='confirmBank' 
+              ? 'active' : '')]" name="bankCardManage">银行卡管理</MenuItem>
             </Submenu>
             <MenuItem name="5">联系客服</MenuItem>
             <MenuItem name="6">规则说明</MenuItem>

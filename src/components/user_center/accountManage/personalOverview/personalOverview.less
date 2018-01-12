@@ -1,0 +1,54 @@
+.personal-overview {
+  min-height: 560px;
+  .ivu-input {
+    border: 1px solid #b2b2b2;
+  }
+  .ivu-date-picker {
+    .ivu-icon:before {
+      content: '';
+    }
+  }
+  .btn {
+    display: inline-block;
+    background: url('../../../../../static/img/index/index_bg.png') no-repeat;
+    background-position: -212px -28px;
+    width: 72px;
+    height: 30px;
+    margin: 0 0 0 15px;
+    text-align: center;
+    line-height: 30px;
+    cursor: pointer;
+    color: #fff;
+    border: none;
+    outline: none;
+  }
+  .table {
+    width: 100%;
+    margin: 30px 0 0 0;
+    border: 1px solid #b2b2b2;
+    border-collapse: collapse;
+    td {
+      height: 30px;
+      line-height: 30px;
+      border: 1px solid #b2b2b2;
+      color: #131311;
+      padding: 0 10px;
+      background: #fff;
+      &:nth-child(2) {
+        width: 100px;
+      }
+    }
+    td:nth-child(1), td:nth-child(3) {
+      width: 95px;
+      background: #C7C7C7;
+      text-align: right;
+    }
+    tr:nth-child(4), tr:nth-child(5) {
+      td:nth-child(3) {
+        background: #fff;
+        text-align: left;
+      }
+    }
+  }
+}
+

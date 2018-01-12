@@ -131,7 +131,10 @@
         .then(response => {
           let data = JSON.parse(response.data);
           if(data.isSuccess){
-            this.vcodeImg = '/api'+data.url+'?w=100&h=35&date='+new Date().getTime();
+            _this.vcodeImg = _this.$baseURL+data.url+'?w=100&h=35&date='+new Date().getTime();
+          }else{
+            _this.Modal = true;
+            _this.tipMessage = data.msg;
           }
         })
         .catch(error => {
@@ -153,11 +156,12 @@
           let data = response.data;
           if(data.success){
             sessionStorage.setItem('custName',data.t.custName);
+            sessionStorage.setItem('custNo',data.t.custNo);
             _this.$router.push('/homeView');
           }else{
             _this.tipMessage = data.msg;
             if(data.code=='10002'){
-              _this.vcodeImg = '/api/getVerCode?w=86&h=35&date='+ new Date().getTime();
+              _this.getVerCode();
             }
             _this.Modal=true;
           }
