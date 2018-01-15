@@ -81,7 +81,6 @@
   export default {
     data() {
       return {
-        test:'<i>asdasdasd</i>',
         Modal:false,
         acctAmt:0,
         tipMessage:'是否要退出',
@@ -115,6 +114,7 @@
       this.getNotice();
       this.getAcct();  
       let _this = this;   
+      let data = '';
       let ws = new WebSocket('ws://192.168.0.86:8080/webSocketServer?custNo='+sessionStorage.getItem('custNo'));
       ws.onopen = function (evt) {
         //已经建立连接
@@ -125,13 +125,17 @@
         console.log('已经关闭连接')
       };
       ws.onmessage = function (evt) {
-        console.log('收到消息')
-        _this.$Notice.warning({
-          title:'asdasd',
-          desc:'asdadasd',
-          duration:0,
-          onClose:function(){}
-        })
+        data = JSON.parse(evt.data);
+        if(data.msgType==4){  //异常登录
+          sessionStorage.clear();
+          _this.$Modal.warning({
+            title: '提示',
+            content: data.msgBody,
+            onOk:function(){
+              _this.$router.push('/')
+            }
+          });
+        }
       };
       ws.onerror = function (evt) {
         //产生异常
@@ -191,6 +195,7 @@
         .then(response => {
           let data = response.data;
           _this.acctAmt = data.t.acctAmt;
+          sessionStorage.setItem('acctAmt',data.t.acctAmt);
         })
         .catch(error => {
 

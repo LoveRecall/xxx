@@ -23,12 +23,12 @@
         <div class="user_info">
           <div class="flex">
             <div class="item">
-              <span>账号:</span><span>xxcsdda</span>
+              <span>账号:</span><span v-text="custName"></span>
             </div>
             <div class="item">
-              <span>余额:</span><span>sadas</span>
+              <span>余额:</span><span v-text="acctAmt"></span>
             </div>
-            <div class="item">返回大厅</div>
+            <div class="item" @click="$router.push('/homeView/lobby')">返回大厅</div>
             <div class="item">退出登录</div>
           </div>         
         </div>
@@ -153,7 +153,7 @@
         <div class="play-box">
           <div class="play-bar flex">
             <div class="play-item flex">
-              <p v-for="item in 10"><router-link class="active" to="/">五星</router-link></p>
+              <p v-for="(item,index) in 10" :key="index" :class="[(kindCheckedIndex ==index?'active':'')]" @click="kindbarList(item,index)">五星</p>
             </div>
             <div class="switch">
               <i-switch v-model="playSwitch"></i-switch>
@@ -164,24 +164,28 @@
           <div class="play-item-list-panel">
             <div class="play-item-list flex" v-for="item in 2">
               <p class="item-label">后三直选：</p>
-              <p class="item" v-for="items in 19">后三直</p>
+              <p class="item play_kind_list" @click="playkindFun(items,$event)" v-for="(items,index) in 19" :key="index">后三直</p>
             </div>
           </div>
           <div class="play-content">
-            <div class="play-content-list flex" v-for="itemWarp in 3">
+            <div class="play-content-list flex" v-for="(itemWarp,DataNumIndex) in DataNumChoice" :key="DataNumIndex">
               <div class="label">
                 <span>{{itemWarp | filterFun}}</span>
               </div>
               <div class="ball-panel flex">
-                <p v-for="item in 19">{{item}}</p>
+                <div v-for="(item,index) in 10" :key="index">
+                  <p @click="choiceNum($event,DataNumIndex)" v-text="item-1"></p>
+                  <sup v-if="LostChecked" :style="{color:item%2==0?'red':''}" v-text="item-1"></sup>
+                  <sup v-if="hotChecked" :style="{color:item%2==0?'red':''}" v-text="item+1"></sup>
+                </div>
               </div>
               <div class="play-btn-box flex">
-                <p>全</p>
-                <p>大</p>
-                <p>小</p>
-                <p>单</p>
-                <p>双</p>
-                <p>清</p>
+                <p @click="quickChoice($event,DataNumIndex)">全</p>
+                <p @click="quickChoice($event,DataNumIndex)">大</p>
+                <p @click="quickChoice($event,DataNumIndex)">小</p>
+                <p @click="quickChoice($event,DataNumIndex)">单</p>
+                <p @click="quickChoice($event,DataNumIndex)">双</p>
+                <p @click="quickChoice($event,DataNumIndex)">清</p>
               </div>
             </div>
             <div style="align-items: center;" class="flex">
@@ -202,9 +206,9 @@
           <div class="add-area-box">
             <div class="add-area flex">
               <div class="flex align-items-c add-panel">
-                <p class="add"><i class="iconfont icon-jianhao"></i></p>
-                <input  class="add_v" type="text" v-model="add_times">
-                <p class="add"><i class="iconfont icon-iconjia"></i></p>
+                <p @click="add_times-=1" class="add"><i class="iconfont icon-jianhao"></i></p>
+                <input v-model="add_times" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" class="add_v" type="text">
+                <p @click="add_times+=1" class="add"><i class="iconfont icon-iconjia"></i></p>
               </div>
               <p style="margin:0 2px;">倍</p>
               <p style="margin:0 2px;">模式</p>
@@ -221,9 +225,9 @@
               <div class="flex showChip">
                 <p>{{silderVal}}</p>
                 <p>
-                  共选<span style="color:#da4040;"> 1000 </span>注；
-                  共投<span style="color:#da4040;"> 2000 </span>元，
-                  盈利<span style="color:#da4040;"> 600 </span>元
+                  共选<span style="color:#da4040;" v-text="allChoiceYard"></span>注；
+                  共投<span style="color:#da4040;" v-text="allPutMoney"></span>元，
+                  盈利<span style="color:#da4040;" v-text="allGetProfit"></span>元
                 </p>
               </div>
               <div class="btn-group">
@@ -382,6 +386,14 @@
   export default {
     data() {
       return {  
+        allChoiceYard:0,//共选多少注
+        allPutMoney:0,//共投多少元
+        allGetProfit:0, //共获得多少利润
+        DataNumChoice:[[],[],[]], //后台传入的 选择号码数据
+        codeNumYardArr:null, //选择投注的号码 组合
+        kindCheckedIndex:0, //彩种玩法下标
+        custName:sessionStorage.getItem('custName'),
+        acctAmt:sessionStorage.getItem('acctAmt'),
         swiperOption:{  //滑动参数
           slidesPerView: 6, //可见个数
           slidesPerGroup: 3, //滑动个数
@@ -435,7 +447,8 @@
            
         ],                
         silderVal:0,
-        add_times:999, //加倍
+        add_times:1, //加倍
+        initCodeMoney:2,//每注价格
         hotChecked:false, //冷热
         LostChecked:false, //遗漏
         autoplay:false,
@@ -452,25 +465,26 @@
           {serial_number:'0125472',number:'1,2,3,4,5'},
           {serial_number:'0125468',number:'1,2,3,4,5,6,7,8'},
         ],
+        // 模式 元 角 分 厘
         modelList: [
             {
-              value: '元',
+              value: 1,
               label: '元'
             },
             {
-              value: '角',
+              value: 0.1,
               label: '角'
             },
             {
-              value: '分',
+              value: 0.01,
               label: '分'
             },
             {
-              value: '厘',
+              value: 0.001,
               label: '厘'
             },
         ],
-        model1: '元'
+        model1: 1
       }
     },
     components:{
@@ -495,7 +509,13 @@
       }
     },
     mounted(){
+      this.codeNumYardArr = new Array();  //先声明一维 用来存放注码
+      let i=this.DataNumChoice.length;
+      for(let k=0;k<i;k++){    //一维长度为i,i为变量，可以根据实际情况改变     
+        this.codeNumYardArr[k]=new Array();  //声明二维，每一个一维数组里面的一个元素都是一个数组；     
+      }
       let _this = this;
+      this.getGameByType();
       let audioArr=[
         '/static/audio/1.ogg',
         '/static/audio/2.ogg',
@@ -528,10 +548,129 @@
           }
         }
       });
-      this.clock.start();      
+      // this.clock.start();      
     },
     methods: {
+      //查询某个彩种下属玩法
+      // get方式传参 是params 不是data
+      getGameByType () {
+        let _this = this;
+        this.$http({
+          method:'post',
+          url:'/getGameByType',
+          params:{
+            gameType:this.$route.params.gameType
+          }
+        })
+        .then(response => {
+          let data = response.data;
+          if(data.success){
+            
+          }else{
 
+          }
+        })
+        .catch(error => {
+
+        })
+      },
+      //玩法列表
+      kindbarList(item,index){
+        this.kindCheckedIndex = index;
+      },
+      //单个玩法 投注（即大类下的小分类）
+      playkindFun(itemse,e){
+        $('.play_kind_list').removeClass('active');
+        $(e.target).addClass('active');
+      },
+      //选择 号码
+      choiceNum(e,index){
+        let _codeNumYardArr = this.codeNumYardArr;
+        if($(e.target).hasClass('active')){
+          $(e.target).removeClass('active');
+          _codeNumYardArr[index].splice(_codeNumYardArr[index].indexOf(e.target.innerText),1)
+        }else{
+          $(e.target).addClass('active');
+          _codeNumYardArr[index].push(e.target.innerText)
+        }       
+        this.validChioceNum();
+      },
+      //快速选择号码
+      quickChoice(e,index){  //判断每个列表下的 号码选中  就知道 是否完成一注
+        let _codeNumYardArr = this.codeNumYardArr;
+        $(e.target).addClass('active').siblings().removeClass('active');
+        //每次先清空 选中
+        //获取父级 panelList 下的 p
+        let panelList_p = $(e.target).parents('.play-content-list').find('.ball-panel P');
+        panelList_p.removeClass('active')
+        let text = e.target.innerText;
+        _codeNumYardArr[index]=[]; //单行 选择投注号码 数组清空 否则重复添加
+        if(e.target.innerText=='全'){
+          panelList_p.addClass('active')
+          panelList_p.each(function(){
+            _codeNumYardArr[index].push($(this).text());
+          })
+        }else if(e.target.innerText=='大'){
+          for(let i =5;i<10;i++){
+            panelList_p.eq(i).addClass('active')
+            _codeNumYardArr[index].push(panelList_p.eq(i).text());
+          }
+        }else if(e.target.innerText=='小'){
+          for(let i =0;i<5;i++){
+            panelList_p.eq(i).addClass('active')
+            _codeNumYardArr[index].push(panelList_p.eq(i).text());
+          }
+        }else if(e.target.innerText=='单'){
+          for(let i =0;i<panelList_p.length;i++){
+            if(Number(panelList_p.eq(i).text())%2!=0){
+              panelList_p.eq(i).addClass('active');
+              _codeNumYardArr[index].push(panelList_p.eq(i).text());
+            }
+          }
+        }else if(e.target.innerText=='双'){
+          for(let i =0;i<panelList_p.length;i++){
+            if(Number(panelList_p.eq(i).text())%2==0){
+              panelList_p.eq(i).addClass('active');
+              _codeNumYardArr[index].push(panelList_p.eq(i).text());
+            }
+          }
+        }else if(e.target.innerText=='清'){
+
+        }
+        this.validChioceNum();
+      },
+      validChioceNum(){ //是否完成有效投注
+        let _this = this;
+        let valid = true; 
+        for(let i=0 ;i<_this.DataNumChoice.length;i++){
+          if(_this.codeNumYardArr[i].length<=0){
+            valid = false;
+          }
+        }
+        if(valid){
+          let items=1; //总注码数
+          _this.codeNumYardArr.map(function(item){
+            items*=item.length
+          })
+          this.allChoiceYard = items;
+          this.allPutMoney = items*this.add_times*this.model1*this.initCodeMoney;
+        }else{
+          this.allChoiceYard = 0;
+          this.allPutMoney= 0;
+        }
+      },
+    },
+    watch:{
+      add_times(value){
+        if(value<=1){
+          this.add_times=1;
+        }
+        this.allPutMoney = this.allChoiceYard*value*this.initCodeMoney*this.model1;
+      },
+      model1(value){
+        //后面 同乘以 同除 为了去除js 浮点数 不精确的问题
+        this.allPutMoney = Number(this.allChoiceYard*value*this.initCodeMoney*this.add_times)*1000000/1000000;
+      }
     },
     beforeRouteLeave(to, from, next){
       next();

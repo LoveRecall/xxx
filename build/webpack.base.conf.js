@@ -14,7 +14,7 @@ function resolve (dir) {
 let webpackConfig = {
   context: path.resolve(__dirname, '../'),
   entry: {
-    app: "./src/main.js",
+    app: ["babel-polyfill", "./src/main.js"],
     jquery: "jquery",
     flipclock: "./src/assets/js/flipclock/flipclock.min.js",
   },

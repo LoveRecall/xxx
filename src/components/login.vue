@@ -217,6 +217,9 @@
    .form-box>>>.ivu-form-item-content {
      line-height: 30px;
    }
+   .form-box>>>.ivu-form-item-content {
+     line-height: 30px;
+   }
    .form-box>>>.weui-vcode-img {
      height: 35px;
      cursor: pointer;

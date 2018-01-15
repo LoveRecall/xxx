@@ -1,17 +1,12 @@
 import axios from 'axios'
 import Vue from 'vue'
-import Router from 'vue-router'
-Vue.use(Router)
-
-const router = new Router;
+import Router from './router'
 
 import { Message } from 'iview'
 Vue.use(Message)
 
 const baseURL = '/api';
-
 Vue.prototype.$baseURL = baseURL;
-
 // 拦截request,设置全局请求为ajax请求
 axios.interceptors.request.use((config) => {
   config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
@@ -76,7 +71,9 @@ axios.interceptors.response.use((response) => {
           content:err.message,
           duration:3,
           onClose:function(){
-            router.push('/');
+            Router.push({
+              path:'/'
+            });
           }
         })
         break

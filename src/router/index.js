@@ -69,7 +69,7 @@ const router = new Router({
       ]
     },
     {
-      path: '/bet',
+      path: '/bet/:gameType',
       name: '投注大厅',
       component: bet
     },
