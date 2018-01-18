@@ -75,17 +75,17 @@ const router = new Router({
     },
   ]
 })
-router.beforeEach((to, from, next) => { 
-  if(to.meta.isLogin){
-    next();
-  }else{
-    if(sessionStorage.getItem('custName')){
-      next();
-    }else{
-      next({
-        path:'/'
-      });
-    }
-  }
-})
+// router.beforeEach((to, from, next) => { 
+//   if(to.meta.isLogin){
+//     next();
+//   }else{
+//     if(sessionStorage.getItem('custName')){
+//       next();
+//     }else{
+//       next({
+//         path:'/'
+//       });
+//     }
+//   }
+// })
 export default router;

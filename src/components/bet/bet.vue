@@ -162,9 +162,9 @@
             </div>
           </div>
           <div class="play-item-list-panel">
-            <div class="play-item-list flex" v-for="item in 2">
+            <div id="play_item_list" class="play-item-list flex" v-for="(item,_index) in 2">
               <p class="item-label">后三直选：</p>
-              <p class="item play_kind_list" @click="playkindFun(items,$event)" v-for="(items,index) in 19" :key="index">后三直</p>
+              <p :class="[('item'),('play_kind_list'),(index==0&&_index==0?'active':'')]"  @click="playkindFun(items,$event)" v-for="(items,index) in 19" :key="index" v-text="'后三直'+index"></p>
             </div>
           </div>
           <div class="play-content">
@@ -213,7 +213,7 @@
               <p style="margin:0 2px;">倍</p>
               <p style="margin:0 2px;">模式</p>
               <div class="model">
-                <Select v-model="model1" style="width:50px">
+                <Select ref="model1" v-model="model1" style="width:50px">
                     <Option v-for="item in modelList" :value="item.value" :key="item.value">{{ item.label }}</Option>
                 </Select>
               </div>
@@ -231,11 +231,11 @@
                 </p>
               </div>
               <div class="btn-group">
-                <Button type="warning">
+                <Button type="warning" @click="btnConfirmChoiceFun" :disabled="btnConfirmChoice">
                   <Icon type="ios-compose"></Icon>
                   确认选号
                 </Button>
-                <Button type="warning" disabled>
+                <Button type="warning" :disabled="btnImmediately">
                   <Icon type="android-checkbox-outline"></Icon>
                   立即下注
                 </Button>
@@ -243,16 +243,16 @@
             </div>
             <div class="add-area flex">
               <p>随机</p>
-              <p><input type="text" style="outline:none;border:1px solid #ccc;width:30px;text-align:center;margin:0 5px;">注</p>
+              <p><input v-model="randomCount" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" type="text" style="outline:none;border:1px solid #ccc;width:30px;text-align:center;margin:0 5px;">注</p>
               <p style="margin:0 5px;">
-                <Button type="default">
+                <Button type="default" @click="randomCodeNum">
                   <Icon type="shuffle" color="#d32a3d"></Icon>
                   随机
                 </Button>
               </p>
               <p style="width:155px;text-align:center;">投注列表</p>
               <p style="margin:0 5px;">
-                <Button type="default">
+                <Button type="default" @click="allYardList=[]">
                   <Icon type="ios-trash-outline" color="#d32a3d"></Icon>
                   清空
                 </Button>
@@ -268,29 +268,37 @@
           <div class="table-box">
             <div class="table-item-1 flex">
               <div class="table-content">
-                <div class="table-list" v-for="item in 4">
-                  <p>后三直选复式</p>
-                  <p>5|8</p>
-                  <p>元</p>
-                  <p>1注</p>
-                  <p>1倍</p>
-                  <p>2元</p>
-                  <p>
-                    <Button type="text">
-                      <Icon type="ios-trash-outline" color="#d32a3d"></Icon>
-                      删除
-                    </Button>
-                  </p>
+                <div style="display:table;width:100%;"> 
+                  <div class="table-list" v-for="(item,index) in allYardList" :key="index">
+                    <p v-text="item.YardName"></p>
+                    <p style="width:120px;">
+                      <span style="display:block;width:120px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" v-text="item.YardNum" :title="item.YardNum"></span>
+                    </p>
+                    <p v-text="item.YardMoneyKind"></p>
+                    <p v-text="item.YardCount+'注'"></p>
+                    <p v-text="item.YardTimes+'倍'"></p>
+                    <p v-text="item.YardMoney+'元'"></p>
+                    <p>
+                      <Button @click="allYardListFun(index)" type="text">
+                        <Icon type="ios-trash-outline" color="#d32a3d"></Icon>
+                        删除
+                      </Button>
+                    </p>
+                  </div>
                 </div>
+                
               </div>
               <div class="operation-box">
                 <div class="operation-list">
                   <p>选择</p>
-                  <p class="text-r"><span style="color:#ec282c;">0</span>注<span style="color:#ec282c;">0</span>单</p>
+                  <p class="text-r">
+                    <span style="color:#ec282c;" v-text="totalChoiceYard"></span>注
+                    <span style="color:#ec282c;" v-text="allYardList.length>0?allYardList.length:0"></span>单
+                  </p>
                 </div>
                 <div class="operation-list">
                   <p>投注</p>
-                  <p class="text-r"><span>元</span></p>
+                  <p class="text-r"><span style="color:#ec282c;" v-text="totalChoiceMoney+'元'"></span></p>
                 </div>
                 <div class="operation-list">
                   <p>追号</p>
@@ -300,7 +308,7 @@
               <div class="operation-btn-box flex">
                 <div class="flex align-items-c" style="justify-content: space-between;width:100%;">
                   <div>
-                    <Button type="warning" disabled>
+                    <Button type="warning" @click="chaseIsShow=true" :disabled="allYardList.length<=0">
                         <Icon type="android-share-alt"></Icon>
                         我要追号
                     </Button>
@@ -319,7 +327,7 @@
                   </div>
                 </div>
                 <div style="width:100%;margin-top:10px;">
-                  <Button style="width:100%;" type="warning">
+                  <Button style="width:100%;" type="warning" :disabled="allYardList.length<=0">
                     <Icon type="ios-checkmark-outline"></Icon>
                       确认下注
                   </Button>
@@ -370,6 +378,84 @@
         </div>
       </div>
     </div>
+    <!-- 追号弹出框 -->
+    <Modal v-model="chaseIsShow" :mask-closable="false" class-name="vertical-center-modal" class="chaseIsShow" width="740">
+      <p slot="header">
+        <span>xxx追号</span>
+      </p>
+      <div class="chasearea">
+        <div class="chasearea-tit">
+          <button-tab>
+            <button-tab-item selected>同倍追号</button-tab-item>
+            <button-tab-item>翻倍追号</button-tab-item>
+          </button-tab>
+        </div>
+        <div class="item-1 flex align-items-c">
+          <div style="width:500px;" class="flex align-items-c">
+            <p>追号计划：</p>
+            <p>
+              每隔：<input type="text"/>期
+              x <input type="text"/> 倍
+            </p>
+            <p>
+              起始倍数 <input type="text" :value="chaseinitTimes"/>
+              追号期数 <input type="text" v-model="chaseSelect"/>
+            </p>
+          </div>
+          <p>
+            <Checkbox>
+              <span>官方跳开即停</span>
+            </Checkbox>
+          </p>
+          <p>
+            <Checkbox>
+              <span>中奖后停止追号</span>
+            </Checkbox>
+          </p>
+        </div>
+        <div class="item-2 flex align-items-c">
+          <div style="width:590px;" class="flex align-items-c">
+            <p>追号期数：</p>
+            <Select v-model="chaseSelect" style="width:100px">
+                <Option v-for="item in chaseSelectList" placement="bottom" :value="item.value" :key="item.value">{{ item.value+'期'}}</Option>
+            </Select>
+            <p style="margin:0 15px;">追号总期数：<span style="color:#ffe400;">0</span></p>
+            <p>追号总金额：<span style="color:#ffe400;">0</span></p>
+          </div>
+          <p><Button type="warning">生成追号计划</Button></p>
+        </div>
+        <div class="item-form">
+           <table cellspacing="0" cellpadding="0" border="0">
+            <tr>
+              <th>期号</th>
+              <th>倍数</th>
+              <th>当前投入</th>
+              <th>截止时间</th>
+            </tr>
+          </table>
+          <table cellspacing="0" cellpadding="0" border="0">
+            <tr v-for="(item,index) in chaseareatableTd" :key="index">
+              <td>
+                <Checkbox>
+                  <span v-text="item.number" class="vertical-m"></span>
+                </Checkbox>
+              </td>
+              <td>
+                <input type="text" :value="item.addTimes"> 倍
+              </td>
+              <td v-text="'￥'+item.currCost"></td>
+              <td v-text="item.stopTime"></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div slot="footer" class="flex">
+        <Button type="error" size="large" long>清空追号</Button>
+        <Button type="error" size="large" long>直接投注</Button>
+        <Button type="error" size="large" @click="chaseIsShow=false" long>取消</Button>
+      </div>
+    </Modal>
+
     <div class="content_line_1"></div>
     <div class="content_line_2"></div>
     <div class="footer">
@@ -381,301 +467,9 @@
   import '../../assets/js/flipclock/flipclock.min.js'
   import '../../assets/js/flipclock/flipclock.min.css'
   import 'swiper/dist/css/swiper.css'
-  import { swiper, swiperSlide } from 'vue-awesome-swiper'
-  import { Group ,XNumber } from 'vux'
+  import cqssc from './cqssc.js'
   export default {
-    data() {
-      return {  
-        allChoiceYard:0,//共选多少注
-        allPutMoney:0,//共投多少元
-        allGetProfit:0, //共获得多少利润
-        DataNumChoice:[[],[],[]], //后台传入的 选择号码数据
-        codeNumYardArr:null, //选择投注的号码 组合
-        kindCheckedIndex:0, //彩种玩法下标
-        custName:sessionStorage.getItem('custName'),
-        acctAmt:sessionStorage.getItem('acctAmt'),
-        swiperOption:{  //滑动参数
-          slidesPerView: 6, //可见个数
-          slidesPerGroup: 3, //滑动个数
-          loop:true,
-          loopFillGroupWithBlank: true,
-          spaceBetween: 30, //间隔距离
-          navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-          },
-        },
-        columns1: [
-            {
-              title: '注单编号',
-              key: '注单编号'
-            },
-            {
-              title: '玩法',
-              key: '玩法'
-            },
-            {
-              title: '期号',
-              key: '期号'
-            },
-            {
-              title: '投注时间',
-              key: '投注时间'
-            },
-            {
-              title: '投注内容',
-              key: '投注内容'
-            },
-            {
-              title: '倍模',
-              key: '倍模'
-            },
-            {
-              title: '总金额',
-              key: '总金额'
-            },
-            {
-              title: '奖金',
-              key: '奖金'
-            },
-            {
-              title: '状态',
-              key: '状态'
-            },
-        ],
-        data1: [
-           
-        ],                
-        silderVal:0,
-        add_times:1, //加倍
-        initCodeMoney:2,//每注价格
-        hotChecked:false, //冷热
-        LostChecked:false, //遗漏
-        autoplay:false,
-        autoPause:true,
-        playSwitch:false,
-        clock:'',
-        audioSrc:'/static/audio/10.ogg',
-        historyList:[
-          {serial_number:'0125426',number:'1,2,3,4,5,6,7,8'},
-          {serial_number:'0125425',number:'1,2,3,4,5,6,7,8'},
-          {serial_number:'0125422',number:'1,2,3,4,5'},
-          {serial_number:'0125446',number:'1,2,3,4,5,6,7,8'},
-          {serial_number:'0125467',number:'1,2,3,4,5,6,7,8'},
-          {serial_number:'0125472',number:'1,2,3,4,5'},
-          {serial_number:'0125468',number:'1,2,3,4,5,6,7,8'},
-        ],
-        // 模式 元 角 分 厘
-        modelList: [
-            {
-              value: 1,
-              label: '元'
-            },
-            {
-              value: 0.1,
-              label: '角'
-            },
-            {
-              value: 0.01,
-              label: '分'
-            },
-            {
-              value: 0.001,
-              label: '厘'
-            },
-        ],
-        model1: 1
-      }
-    },
-    components:{
-      XNumber,Group,swiper,swiperSlide
-    },
-    computed: {
-      swiper() {
-        return this.$refs.mySwiper.swiper
-      }
-    },
-    filters:{
-      filterFun(res){
-        let _res = res;
-        if(_res==1){
-          _res='百位'
-        }else if(_res==2){
-          _res='十位'
-        }else if(_res==3){
-          _res='个位'
-        }
-        return _res
-      }
-    },
-    mounted(){
-      this.codeNumYardArr = new Array();  //先声明一维 用来存放注码
-      let i=this.DataNumChoice.length;
-      for(let k=0;k<i;k++){    //一维长度为i,i为变量，可以根据实际情况改变     
-        this.codeNumYardArr[k]=new Array();  //声明二维，每一个一维数组里面的一个元素都是一个数组；     
-      }
-      let _this = this;
-      this.getGameByType();
-      let audioArr=[
-        '/static/audio/1.ogg',
-        '/static/audio/2.ogg',
-        '/static/audio/3.ogg',
-        '/static/audio/4.ogg',
-        '/static/audio/5.ogg',
-        '/static/audio/6.ogg',
-        '/static/audio/7.ogg',
-        '/static/audio/8.ogg',
-        '/static/audio/9.ogg',
-        '/static/audio/10.ogg',
-      ]
-      this.clock = $('.your-clock').FlipClock(15,{
-        clockFace: 'HourMinuteCounter',
-        countdown: true,
-        autoStart: false,
-        callbacks: {
-          start: function() {
-          },
-          interval:function(){
-            if(_this.autoPause){
-              if(_this.clock.getTime().time<10){ 
-                _this.audioSrc = audioArr[_this.clock.getTime().time];          
-                _this.$refs.autoplay.load();
-                _this.$refs.autoplay.play();
-              }
-            }else{
-              _this.$refs.autoplay.pause();
-            }
-          }
-        }
-      });
-      // this.clock.start();      
-    },
-    methods: {
-      //查询某个彩种下属玩法
-      // get方式传参 是params 不是data
-      getGameByType () {
-        let _this = this;
-        this.$http({
-          method:'post',
-          url:'/getGameByType',
-          params:{
-            gameType:this.$route.params.gameType
-          }
-        })
-        .then(response => {
-          let data = response.data;
-          if(data.success){
-            
-          }else{
-
-          }
-        })
-        .catch(error => {
-
-        })
-      },
-      //玩法列表
-      kindbarList(item,index){
-        this.kindCheckedIndex = index;
-      },
-      //单个玩法 投注（即大类下的小分类）
-      playkindFun(itemse,e){
-        $('.play_kind_list').removeClass('active');
-        $(e.target).addClass('active');
-      },
-      //选择 号码
-      choiceNum(e,index){
-        let _codeNumYardArr = this.codeNumYardArr;
-        if($(e.target).hasClass('active')){
-          $(e.target).removeClass('active');
-          _codeNumYardArr[index].splice(_codeNumYardArr[index].indexOf(e.target.innerText),1)
-        }else{
-          $(e.target).addClass('active');
-          _codeNumYardArr[index].push(e.target.innerText)
-        }       
-        this.validChioceNum();
-      },
-      //快速选择号码
-      quickChoice(e,index){  //判断每个列表下的 号码选中  就知道 是否完成一注
-        let _codeNumYardArr = this.codeNumYardArr;
-        $(e.target).addClass('active').siblings().removeClass('active');
-        //每次先清空 选中
-        //获取父级 panelList 下的 p
-        let panelList_p = $(e.target).parents('.play-content-list').find('.ball-panel P');
-        panelList_p.removeClass('active')
-        let text = e.target.innerText;
-        _codeNumYardArr[index]=[]; //单行 选择投注号码 数组清空 否则重复添加
-        if(e.target.innerText=='全'){
-          panelList_p.addClass('active')
-          panelList_p.each(function(){
-            _codeNumYardArr[index].push($(this).text());
-          })
-        }else if(e.target.innerText=='大'){
-          for(let i =5;i<10;i++){
-            panelList_p.eq(i).addClass('active')
-            _codeNumYardArr[index].push(panelList_p.eq(i).text());
-          }
-        }else if(e.target.innerText=='小'){
-          for(let i =0;i<5;i++){
-            panelList_p.eq(i).addClass('active')
-            _codeNumYardArr[index].push(panelList_p.eq(i).text());
-          }
-        }else if(e.target.innerText=='单'){
-          for(let i =0;i<panelList_p.length;i++){
-            if(Number(panelList_p.eq(i).text())%2!=0){
-              panelList_p.eq(i).addClass('active');
-              _codeNumYardArr[index].push(panelList_p.eq(i).text());
-            }
-          }
-        }else if(e.target.innerText=='双'){
-          for(let i =0;i<panelList_p.length;i++){
-            if(Number(panelList_p.eq(i).text())%2==0){
-              panelList_p.eq(i).addClass('active');
-              _codeNumYardArr[index].push(panelList_p.eq(i).text());
-            }
-          }
-        }else if(e.target.innerText=='清'){
-
-        }
-        this.validChioceNum();
-      },
-      validChioceNum(){ //是否完成有效投注
-        let _this = this;
-        let valid = true; 
-        for(let i=0 ;i<_this.DataNumChoice.length;i++){
-          if(_this.codeNumYardArr[i].length<=0){
-            valid = false;
-          }
-        }
-        if(valid){
-          let items=1; //总注码数
-          _this.codeNumYardArr.map(function(item){
-            items*=item.length
-          })
-          this.allChoiceYard = items;
-          this.allPutMoney = items*this.add_times*this.model1*this.initCodeMoney;
-        }else{
-          this.allChoiceYard = 0;
-          this.allPutMoney= 0;
-        }
-      },
-    },
-    watch:{
-      add_times(value){
-        if(value<=1){
-          this.add_times=1;
-        }
-        this.allPutMoney = this.allChoiceYard*value*this.initCodeMoney*this.model1;
-      },
-      model1(value){
-        //后面 同乘以 同除 为了去除js 浮点数 不精确的问题
-        this.allPutMoney = Number(this.allChoiceYard*value*this.initCodeMoney*this.add_times)*1000000/1000000;
-      }
-    },
-    beforeRouteLeave(to, from, next){
-      next();
-      this.clock.stop(); 
-    }
+    ...cqssc
   }
 </script>
 <style scoped lang="less">
