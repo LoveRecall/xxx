@@ -7,8 +7,8 @@ import iView from 'iview';
 import 'iview/dist/styles/iview.css';    // 使用 CSS
 import axios from 'axios';
 import app from './axios.config';
-
-//配置WebSocket
+import store from './vuex/store';
+// import './directive';
 const transformRequest = function (data) {
   let ret = ''
   for (let it in data) {
@@ -30,6 +30,7 @@ Vue.config.productionTip = false
 new Vue({
   el: '#app',
   router,
+  store,
   template: '<App/>',
   components: { App }
 })

@@ -69,7 +69,7 @@
       const validateAmount = (rule, value, callback) => {
         if(!/^[0-9]*$/.test(value)) {
           callback(new Error('金额格式不正确'));
-        }else {         
+        }else {        
           callback();
         }
       };
@@ -94,7 +94,7 @@
         kindChecked:0, //充值类型下标
         formValidate: {
           accountKind: '',
-          amount: '',
+          amount: 12,
           userName:''
         },
         ruleValidate: {
@@ -102,8 +102,7 @@
             { required: true, message: '请输入所属银行', trigger: 'blur' }
           ],
           amount: [
-            { required: true, message: '金额不能为空', trigger: 'blur' },
-            { validator: validateAmount,trigger: 'blur' },
+            { validator: validateAmount,trigger: 'blur',},
           ],
           userName: [
             { required: true, message: '请输入姓名', trigger: 'blur' },

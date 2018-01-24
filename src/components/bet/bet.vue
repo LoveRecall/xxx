@@ -10,8 +10,7 @@
           </div>
           <div class="right">
             <i style="color:#d00808;" class="iconfont icon-icon165 vertical-m"></i>
-            <span class="vertical-m" style="color:#050503">下午</span>    
-            <span class="vertical-m">02:30</span>    
+            <span class="vertical-m" style="color:#050503" v-text="hourFun">下午</span>      
           </div>
           <div class="clear"></div>
         </div>
@@ -29,7 +28,7 @@
               <span>余额:</span><span v-text="acctAmt"></span>
             </div>
             <div class="item" @click="$router.push('/homeView/lobby')">返回大厅</div>
-            <div class="item">退出登录</div>
+            <div class="item" @click="loginOut">退出登录</div>
           </div>         
         </div>
         <div class="clear"></div>
@@ -40,45 +39,45 @@
       <div class="left-panel">
         <div class="nav-item-box flex">
           <div class="active">
-            <router-link to="">
+            <router-link to="/homeView/user_center">
               <i class="iconfont icon-arrRight-fill vertical-m"></i>
               <i class="iconfont icon-chongzhi1 vertical-m"></i>
               <span class="vertical-m">充值</span>
             </router-link>
           </div>
           <div class="active">
-            <router-link to="">
+            <router-link to="/homeView/user_center/curtain">
               <i class="iconfont icon-arrRight-fill vertical-m"></i>
               <i class="iconfont icon-zhuzhuangtu vertical-m"></i>
               <span class="vertical-m">帐变记录</span>
             </router-link>
           </div>
           <div>
-            <router-link to="">
+            <router-link to="/homeView/user_center/withdrawal">
               <i class="iconfont icon-arrRight-fill vertical-m"></i>
               <i class="iconfont icon-chongzhi vertical-m"></i>
               <span class="vertical-m">提现</span>
             </router-link>
           </div>
           <div>
-            <router-link to="">
+            <router-link to="/homeView/user_center/buyQuery">
               <i class="iconfont icon-arrRight-fill vertical-m"></i>
               <i class="iconfont icon-youxipianhao vertical-m"></i>
               <span class="vertical-m">游戏记录</span>
             </router-link>
           </div>
           <div class="active">
-            <router-link to="">
+            <router-link to="/homeView/user_center/personalOverview">
               <i class="iconfont icon-arrRight-fill vertical-m"></i>
               <i class="iconfont icon-zhanghuguanli vertical-m"></i>
               <span class="vertical-m">账户管理</span>
             </router-link>
           </div>
           <div class="active">
-            <router-link to="">
+            <router-link to="/homeView/user_center">
               <i class="iconfont icon-arrRight-fill vertical-m"></i>
               <i class="iconfont icon-huiyuan vertical-m"></i>
-              <span class="vertical-m">会员中心</span>
+              <span class="vertical-m">用户中心</span>
             </router-link>
           </div>
           <div class="active">
@@ -105,43 +104,36 @@
             </router-link>
           </div>
           <div class="history-list-box">
-            <div class="history-list flex" :title="item.number" v-for="(item,index) in historyList">
+            <div class="history-list flex" :title="'期数：'+item.gameNumber+'；开奖号码：'+item.gameOpenNo" v-for="(item,index) in historyList">
               <div class="sort" v-text="index+1"></div>
-              <div class="serial_number" v-text="item.serial_number"></div>
-              <div class="number" v-text="item.number"></div>
+              <div class="serial_number" v-text="item.gameNumber"></div>
+              <div class="number" v-text="item.gameOpenNo"></div>
             </div>
           </div>
         </div>
       </div>
-
       <div class="rigth-panel">
         <div class="award-result flex">
           <div class="flex">
             <div class="result flex">
               <div class="ball-panel flex">
-                <p>3</p>
-                <p>4</p>
-                <p>6</p>
-                <p>7</p>
-                <p>8</p>
-                <p>8</p>
-                <p>8</p>
-                <p>8</p>
-                <p>8</p>
-                <p>8</p>
+                <p v-for="(item,index) in gameOpenNo.gameOpenNo" :key="index" v-text="item"></p>
               </div>
-              <p>第2018010412期开奖结果</p>
+              <p>第<span v-text="gameOpenNo.gameNumber"></span>期开奖结果</p>
             </div>
-            <div class="result-countdown flex">
+            <div v-if="!getGameNextOpenNodata.gameNumber" class="result-countdown flex" style="color:#fff;">
+              未找到下一期开奖数据！
+            </div>
+            <div v-if="getGameNextOpenNodata.gameNumber" class="result-countdown flex">
               <p class="result-countdown-tit">
                 <span>第</span>
-                <span style="color:#ffb508;"> 201801041 </span>
+                <span style="color:#ffb508;" v-text="getGameNextOpenNodata.gameNumber"></span>
                 <span>期</span>
                 <button v-if="autoPause" @click="autoPause=false">关闭音效</button>
                 <button v-else @click="autoPause=true">打开音效</button>
               </p>
               <div class="countdown align-items-c flex">
-                <div style="white-space: nowrap;color:#fff;font-size:16px;">剩余投注时间 </div>
+                <div style="white-space: nowrap;color:#fff;font-size:14px;margin-right:10px;">剩余投注时间</div>
                 <div class="your-clock"></div>
                 <audio ref="autoplay">
                   <source :src="audioSrc" type="audio/ogg"/>
@@ -153,7 +145,11 @@
         <div class="play-box">
           <div class="play-bar flex">
             <div class="play-item flex">
-              <p v-for="(item,index) in 10" :key="index" :class="[(kindCheckedIndex ==index?'active':'')]" @click="kindbarList(item,index)">五星</p>
+              <p v-for="(item,index) in getGameGroupByGameWithGroupdata" 
+                 :key="index" 
+                 v-text="item.groupClassName" 
+                 :class="[(kindCheckedIndex ==index?'active':'')]" 
+                 @click="kindbarList(item,index)"></p>
             </div>
             <div class="switch">
               <i-switch v-model="playSwitch"></i-switch>
@@ -162,108 +158,23 @@
             </div>
           </div>
           <div class="play-item-list-panel">
-            <div id="play_item_list" class="play-item-list flex" v-for="(item,_index) in 2">
-              <p class="item-label">后三直选：</p>
-              <p :class="[('item'),('play_kind_list'),(index==0&&_index==0?'active':'')]"  @click="playkindFun(items,$event)" v-for="(items,index) in 19" :key="index" v-text="'后三直'+index"></p>
-            </div>
-          </div>
-          <div class="play-content">
-            <div class="play-content-list flex" v-for="(itemWarp,DataNumIndex) in DataNumChoice" :key="DataNumIndex">
-              <div class="label">
-                <span>{{itemWarp | filterFun}}</span>
-              </div>
-              <div class="ball-panel flex">
-                <div v-for="(item,index) in 10" :key="index">
-                  <p @click="choiceNum($event,DataNumIndex)" v-text="item-1"></p>
-                  <sup v-if="LostChecked" :style="{color:item%2==0?'red':''}" v-text="item-1"></sup>
-                  <sup v-if="hotChecked" :style="{color:item%2==0?'red':''}" v-text="item+1"></sup>
-                </div>
-              </div>
-              <div class="play-btn-box flex">
-                <p @click="quickChoice($event,DataNumIndex)">全</p>
-                <p @click="quickChoice($event,DataNumIndex)">大</p>
-                <p @click="quickChoice($event,DataNumIndex)">小</p>
-                <p @click="quickChoice($event,DataNumIndex)">单</p>
-                <p @click="quickChoice($event,DataNumIndex)">双</p>
-                <p @click="quickChoice($event,DataNumIndex)">清</p>
-              </div>
-            </div>
-            <div style="align-items: center;" class="flex">
-              <div>后三码:</div>
-              <div>后三直选复式</div>
-              <div style="margin-left:20px;">
-                <Checkbox v-model="hotChecked" @click.native="LostChecked = false">
-                  <span style="margin-left:2px;">冷热</span>
-                </Checkbox>
-                <Checkbox v-model="LostChecked" @click.native="hotChecked = false">
-                  <span style="margin-left:2px;">遗漏</span>
-                </Checkbox>
-              </div>
-              <br>
-            </div>
-          </div>
-          <!-- 加倍区 -->
-          <div class="add-area-box">
-            <div class="add-area flex">
-              <div class="flex align-items-c add-panel">
-                <p @click="add_times-=1" class="add"><i class="iconfont icon-jianhao"></i></p>
-                <input v-model="add_times" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" class="add_v" type="text">
-                <p @click="add_times+=1" class="add"><i class="iconfont icon-iconjia"></i></p>
-              </div>
-              <p style="margin:0 2px;">倍</p>
-              <p style="margin:0 2px;">模式</p>
-              <div class="model">
-                <Select ref="model1" v-model="model1" style="width:50px">
-                    <Option v-for="item in modelList" :value="item.value" :key="item.value">{{ item.label }}</Option>
-                </Select>
-              </div>
-              <div class="silder">
-                <div>
-                  <Slider v-model="silderVal" :step="1"></Slider>
-                </div>
-              </div>
-              <div class="flex showChip">
-                <p>{{silderVal}}</p>
-                <p>
-                  共选<span style="color:#da4040;" v-text="allChoiceYard"></span>注；
-                  共投<span style="color:#da4040;" v-text="allPutMoney"></span>元，
-                  盈利<span style="color:#da4040;" v-text="allGetProfit"></span>元
-                </p>
-              </div>
-              <div class="btn-group">
-                <Button type="warning" @click="btnConfirmChoiceFun" :disabled="btnConfirmChoice">
-                  <Icon type="ios-compose"></Icon>
-                  确认选号
-                </Button>
-                <Button type="warning" :disabled="btnImmediately">
-                  <Icon type="android-checkbox-outline"></Icon>
-                  立即下注
-                </Button>
-              </div>
-            </div>
-            <div class="add-area flex">
-              <p>随机</p>
-              <p><input v-model="randomCount" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" type="text" style="outline:none;border:1px solid #ccc;width:30px;text-align:center;margin:0 5px;">注</p>
-              <p style="margin:0 5px;">
-                <Button type="default" @click="randomCodeNum">
-                  <Icon type="shuffle" color="#d32a3d"></Icon>
-                  随机
-                </Button>
-              </p>
-              <p style="width:155px;text-align:center;">投注列表</p>
-              <p style="margin:0 5px;">
-                <Button type="default" @click="allYardList=[]">
-                  <Icon type="ios-trash-outline" color="#d32a3d"></Icon>
-                  清空
-                </Button>
-              </p>
-              <p style="width:150px;text-align:center;">操作状态</p>
-              <div class="add-area-switc">
-                <i-switch v-model="playSwitch" class="vertical-m"></i-switch>
-                <span class="vertical-m">是否锁定倍数</span>
+            <div v-if="getGameGroupByGameWithGroupdata.length>0">
+              <div class="play-item-list flex" 
+                v-for="(_item,_index) in getGameGroupByGameWithGroupdata[kindCheckedIndex].groupClassCones" :key="_index">
+              <p class="item-label" v-text="_item.groupClassConName+'：'"></p>
+              <p :class="[('item'),('play_kind_list'),(index==playkindFunIndex.index&&_index==playkindFunIndex._index?'active':'')]"  
+                  @click="playkindFun($event,items.groupNo,_index,index)" 
+                  v-for="(items,index) in _item.groupSettinges" :key="index" 
+                  v-text="items.groupName"></p>
               </div>
             </div>
           </div>
+          <!-- 不同玩法 加载不同模块   注：同一玩法可能有相同的模板 -->
+          <!--五星复式-->     
+          <fiveStarRepet v-if="this.DataNumChoiceCode == 111155001122" ref="fiveStarRepet"></fiveStarRepet> 
+          <!-- 前二-->
+          <before2single v-if="this.DataNumChoiceCode == 111122111111" ref="before2single"></before2single> 
+          <!-- 不同玩法 加载不同模块 -->
           <!-- 表格 -->
           <div class="table-box">
             <div class="table-item-1 flex">
@@ -386,19 +297,19 @@
       <div class="chasearea">
         <div class="chasearea-tit">
           <button-tab>
-            <button-tab-item selected>同倍追号</button-tab-item>
-            <button-tab-item>翻倍追号</button-tab-item>
+            <button-tab-item @on-item-click="aliketimesChase=false" selected>同倍追号</button-tab-item>
+            <button-tab-item @on-item-click="aliketimesChase=true">翻倍追号</button-tab-item>
           </button-tab>
         </div>
         <div class="item-1 flex align-items-c">
           <div style="width:500px;" class="flex align-items-c">
             <p>追号计划：</p>
-            <p>
-              每隔：<input type="text"/>期
-              x <input type="text"/> 倍
+            <p v-if="aliketimesChase">
+              每隔：<input type="text" :value="intervalperiod"/>期
+              x <input type="text" :value="intervaltimes"/> 倍
             </p>
-            <p>
-              起始倍数 <input type="text" :value="chaseinitTimes"/>
+            <p style="margin:0 10px;">
+              起始倍数 <input type="text"  :value="chaseinitTimes"/>
               追号期数 <input type="text" v-model="chaseSelect"/>
             </p>
           </div>
@@ -416,9 +327,6 @@
         <div class="item-2 flex align-items-c">
           <div style="width:590px;" class="flex align-items-c">
             <p>追号期数：</p>
-            <Select v-model="chaseSelect" style="width:100px">
-                <Option v-for="item in chaseSelectList" placement="bottom" :value="item.value" :key="item.value">{{ item.value+'期'}}</Option>
-            </Select>
             <p style="margin:0 15px;">追号总期数：<span style="color:#ffe400;">0</span></p>
             <p>追号总金额：<span style="color:#ffe400;">0</span></p>
           </div>
@@ -433,20 +341,24 @@
               <th>截止时间</th>
             </tr>
           </table>
-          <table cellspacing="0" cellpadding="0" border="0">
-            <tr v-for="(item,index) in chaseareatableTd" :key="index">
-              <td>
-                <Checkbox>
+          <div style="max-height:210px;overflow:auto;">
+            <table cellspacing="0" cellpadding="0" border="0">
+              <tr @click="chaseaItemFun($event)" v-for="(item,index) in chaseareatableTd" :key="index">
+                <td>
+                  <span class="ivu-checkbox">   
+                    <span class="ivu-checkbox-inner"></span>
+                    <input type="checkbox" @click="checkboxedself($event)" class="ivu-checkbox-input">
+                  </span>
                   <span v-text="item.number" class="vertical-m"></span>
-                </Checkbox>
-              </td>
-              <td>
-                <input type="text" :value="item.addTimes"> 倍
-              </td>
-              <td v-text="'￥'+item.currCost"></td>
-              <td v-text="item.stopTime"></td>
-            </tr>
-          </table>
+                </td>
+                <td>
+                  <input @click.stop="stop" type="text" :value="item.addTimes"> 倍
+                </td>
+                <td v-text="'￥'+item.currCost"></td>
+                <td v-text="item.stopTime"></td> 
+              </tr>
+            </table>
+          </div>
         </div>
       </div>
       <div slot="footer" class="flex">
@@ -467,9 +379,9 @@
   import '../../assets/js/flipclock/flipclock.min.js'
   import '../../assets/js/flipclock/flipclock.min.css'
   import 'swiper/dist/css/swiper.css'
-  import cqssc from './cqssc.js'
+  import bet from './bet.js'
   export default {
-    ...cqssc
+    ...bet
   }
 </script>
 <style scoped lang="less">

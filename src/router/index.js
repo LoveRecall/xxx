@@ -4,7 +4,7 @@ import login from '@/components/login'; //登录
 import homeView from '@/components/homeView'; //主页路由视图
 import index from '@/components/index/index'; //首页
 import lobby from '@/components/lobby/lobby'; //彩票大厅
-import bet from '@/components/bet/bet'; //投注大厅
+import bet from '@/components/bet/bet.vue'; //投注大厅
 import user_center from '@/components/user_center/user_center'; //用户中心
 import recharge from '@/components/user_center/recharge/recharge'; //充值
 import personage from '@/components/user_center/personageForm/personage'; //个人报表
@@ -69,7 +69,7 @@ const router = new Router({
       ]
     },
     {
-      path: '/bet/:gameType',
+      path: '/bet/:gameNo',
       name: '投注大厅',
       component: bet
     },
