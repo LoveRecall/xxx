@@ -3,10 +3,10 @@
     <div class="user_center_box flex">
       <div class="left-menu">
         <div class="left-menu-line">
-          <Menu width="auto" @on-select="GoRouter" accordion>
+          <Menu width="auto" :open-names="[this.$route.name]" @on-select="GoRouter" accordion>
             <MenuItem name="recharge">充值</MenuItem>
             <MenuItem name="withdrawal">提现</MenuItem>
-            <Submenu name="2">
+            <Submenu name="curtain">
               <template slot="title">
                 报表管理
               </template>
@@ -14,14 +14,14 @@
               <MenuItem :class="[($route.name=='personage' ? 'active' : '')]" name="personage">个人报表</MenuItem>
               <MenuItem :class="[($route.name=='activity' ? 'active' : '')]" name="activity">优惠活动详情</MenuItem>
             </Submenu>
-            <Submenu name="3">
+            <Submenu name="buyQuery">
               <template slot="title">
                 游戏记录
               </template>
               <MenuItem :class="[($route.name=='buyQuery' ? 'active' : '')]" name="buyQuery">购彩查询</MenuItem>
               <MenuItem :class="[($route.name=='trackQuery' ? 'active' : '')]" name="trackQuery">追号查询</MenuItem>
             </Submenu>
-            <Submenu name="4">
+            <Submenu name="personalOverview">
               <template slot="title">
                 账户管理
               </template>
@@ -56,7 +56,7 @@
   export default {
     data() {
       return {
-      
+  
       }
     },
     computed: {
@@ -72,7 +72,8 @@
     }
   }
 </script>
-<style scoped>
+
+<style scoped lang="less">
   .user_center{
     margin: 0 0 50px 0;
   }
@@ -90,30 +91,34 @@
     border: 1px solid #c22629;
     height: 100%;;
   }
-  .left-menu >>> .ivu-menu{
+  .left-menu /deep/.ivu-menu{
     background: none;
   }
-  .left-menu >>> .ivu-menu-submenu-title{
+  .left-menu /deep/.ivu-menu-submenu-title{
     background: #bd0102;
     color: #fff;
     border: none;
     margin-bottom: 2px;
     line-height: 40px;
     padding: 0 24px;
+    &:hover{
+      background: #bd0102;
+    }
   }
-  .left-menu >>> .ivu-menu-vertical .ivu-menu-submenu-title-icon{
+  .left-menu /deep/.ivu-menu-vertical .ivu-menu-submenu-title-icon{
     top:14px;
   }
-  .left-menu >>> .ivu-menu-submenu-title+.ivu-menu .ivu-menu-item{
+  .left-menu /deep/.ivu-menu-submenu-title+.ivu-menu .ivu-menu-item{
     background:none;
+    padding: 0 24px;
   }
-  .left-menu >>> .ivu-menu-submenu-title+.ivu-menu .ivu-menu-item:hover{
+  .left-menu /deep/.ivu-menu-submenu-title+.ivu-menu .ivu-menu-item:hover{
     background: #5e5959;
   }
-  .left-menu >>> .ivu-menu-submenu-title+.ivu-menu .ivu-menu-item.active{
+  .left-menu /deep/.ivu-menu-submenu-title+.ivu-menu .ivu-menu-item.active{
     background: #5e5959;
   }
-  .left-menu >>> .ivu-menu-item{
+  .left-menu /deep/.ivu-menu-item{
     background: #bd0102;
     color: #fff;
     border: none;
@@ -121,11 +126,15 @@
     height: 40px;
     line-height: 40px;
     padding: 0 24px;
+    &:hover{
+      background: #bd0102;
+    }
   }
-  .left-menu >>> .ivu-menu-vertical.ivu-menu-light:after{
+  
+  .left-menu /deep/.ivu-menu-vertical.ivu-menu-light:after{
     width:0;
   }
-  .left-menu >>> .ivu-menu-light.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu){
+  .left-menu /deep/.ivu-menu-light.ivu-menu-vertical .ivu-menu-item-active:not(.ivu-menu-submenu){
     border: none;
     color: #fff;
   }

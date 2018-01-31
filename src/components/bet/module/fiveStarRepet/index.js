@@ -3,21 +3,23 @@ export default {
     return{
       hotChecked:false, //冷热
       LostChecked:false, //遗漏
+      initCodeMoney:2, //每注 金额
       randomCount:1, //随机注数
     }
   },
   mounted(){
-
+    this.$parent.initCodeMoney = this.initCodeMoney;
   },
   methods:{
-    //选择 号码
     updata_add_times(arg){
       if(arg =='add'){
         this.$parent.add_times++;
-      }else{
+      }else if(arg =='sub'){
         if(this.$parent.add_times>1){
           this.$parent.add_times--;
         }
+      }else{
+        this.$parent.add_times = parseInt(arg.target.value).toString() == 'NaN' ? 0 : parseInt(arg.target.value);
       }
     },
     updata_model1(v){
@@ -98,9 +100,11 @@ export default {
         this.$parent.btnConfirmChoice = false;
         this.$parent.allChoiceYard = items;
         this.$parent.allPutMoney = items*this.$parent.add_times*this.$parent.model1*this.$parent.initCodeMoney;
+        this.$parent.estimateProfit = this.$parent.allGetProfit - this.$parent.allPutMoney;
       }else{
         this.$parent.allChoiceYard = 0;
         this.$parent.allPutMoney= 0;
+        this.$parent.estimateProfit = 0;
         this.$parent.btnImmediately = true;
         this.$parent.btnConfirmChoice = true;
       }
@@ -137,7 +141,7 @@ export default {
       }
     },
     //确认选号
-    btnConfirmChoiceFun(){
+    btnConfirmChoiceFun(arg){
       //全部清空
       let allYardObj = {};
       let splitArr=''; //转换数组 传入后台输出格式
@@ -154,15 +158,75 @@ export default {
       allYardObj.YardCount = this.$parent.allChoiceYard;
       allYardObj.YardTimes = this.$parent.add_times;
       allYardObj.YardMoney = this.$parent.allPutMoney;
-      this.$parent.allYardList.push(allYardObj);
+      if(arg=='atOnce'){
+        let obj = {};
+        obj.gameNo =  this.$route.params.gameNo;
+        obj.groupNo =  this.$parent.getGameGroupByGameWithGroupdata[this.$parent.kindCheckedIndex].groupClassCones[this.$parent.playkindFunIndex._index].groupSettinges[this.$parent.playkindFunIndex.index].groupNo;
+        obj.betContent = allYardObj.YardNum;
+        obj.betMultiple = allYardObj.YardTimes;
+        obj.betNumber = allYardObj.YardCount;
+        obj.betAmt = allYardObj.YardMoney;
+        obj.estimateProfit = this.$parent.estimateProfit;
+        let gamePattern=1;
+        if( this.$parent.model1==1){
+          gamePattern=0
+        }else if( this.$parent.model1==0.1){
+          gamePattern=1
+        }else if( this.$parent.model1==0.01){
+          gamePattern=2
+        }
+        obj.gamePattern = gamePattern;
+        this.gamebet([obj]);
+      }else{
+        this.$parent.allYardList.push(allYardObj);
+        this.textAreaV = '';
+      }
       $('.play-content p.active').removeClass('active');
-      this.$parent.btnImmediately = true;
-      this.$parent.btnConfirmChoice = true;
       this.$parent.codeNumYardArr = new Array();  
       let i=this.$parent.DataNumChoice.sub.length;
       for(let k=0;k<i;k++){       
         this.$parent.codeNumYardArr[k]=new Array(); 
       }
+      this.validChioceNum();
     },
+    //游戏投注
+    gamebet(data){
+      if(Number(this.$parent.acctAmt)<=0){
+        this.$Modal.error({
+          content:'您的余额不足,暂无法下注，请及时充值！'
+        })
+        return
+      }
+      let _this = this;
+      this.$http({
+        method:'post',
+        url:'/game/bet',
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8'
+        },
+        data:data
+      })
+      .then(response => {
+        let data = response.data;
+        this.textAreaV='';
+        let content = '';
+        if(data.success){
+          content='投注成功';
+        }else{
+          if(data.code ==10003){
+            content='暂未开盘';
+          }
+          else{
+            content='投注失败';
+          }
+        }
+        _this.$Modal.warning({
+          content:content
+        })
+      })
+      .catch(error => {
+
+      })
+    }
   }
 }

@@ -9,7 +9,8 @@ const baseURL = '/api';
 Vue.prototype.$baseURL = baseURL;
 // 拦截request,设置全局请求为ajax请求
 axios.interceptors.request.use((config) => {
-  config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
+  config.headers['X-Requested-With'] = 'XMLHttpRequest';
+  // config.headers['Content-Type'] = 'application/x-www-form-urlencoded'
   config.baseURL = baseURL;
   return config
 })
@@ -17,52 +18,9 @@ axios.interceptors.request.use((config) => {
 // 拦截响应response，并做一些错误处理
 axios.interceptors.response.use((response) => {
   const data = response.data
-  // 根据返回的code值来做不同的处理（和后端约定）
-  // switch (data.code) {ffwF
-  //   case '0':
-  //     // 举例
-  //     // exp: 修复iPhone 6+ 微信点击返回出现页面空白的问题
-  //     if (isIOS()) {
-  //       // 异步以保证数据已渲染到页面上
-  //       setTimeout(() => {
-  //         // 通过滚动强制浏览器进行页面重绘
-  //         document.body.scrollTop += 1
-  //       }, 0)
-  //     }
-  //     // 这一步保证数据返回，如果没有return则会走接下来的代码，不是未登录就是报错
-  //     return data
-
-  //   // 需要重新登录
-  //   case 'SHIRO_E5001':
-  //     // 微信生产环境下授权登录
-  //     if (isWeChat() && IS_PRODUCTION) {
-  //       axios.get(apis.common.wechat.authorizeUrl).then(({ result }) => {
-  //         location.replace(global.decodeURIComponent(result))
-  //       })
-  //     } else {
-  //       // 否则跳转到h5登录并带上跳转路由
-  //       const search = encodeSearchParams({
-  //         next: location.href,
-  //       })
-
-  //       location.replace(`/user/login?${search}`)
-  //     }
-
-  //     // 不显示提示消息
-  //     data.description = ''
-  //     break
-
-  //   default:
-  // }
   return response;
-  // // 若不是正确的返回code，且已经登录，就抛出错误
-  // const err = new Error(data.description)
-
-  // err.data = data
-  // err.response = response
-
-  // throw err
 }, (err) => { // 这里是返回状态码不为200时候的错误处理
+  Message.destroy();
   if (err && err.response) {
     switch (err.response.status) {
       case 481:
@@ -126,9 +84,6 @@ axios.interceptors.response.use((response) => {
         break
       default:
     }
-    // vue.$Message.error({
-    //   content:err.message,
-    // })
   }
   return Promise.reject(err)
 })

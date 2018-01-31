@@ -13,21 +13,13 @@ module.exports = {
     //跨域代理
     proxyTable: {
       '/api': {
-        target: 'http://192.168.0.86:8080',
+        // target: 'http://192.168.0.86:8080',
+        target: 'http://192.168.0.174:8081',
         changeOrigin: true,
         pathRewrite: {
           '^/api': ''
         }
       },
-      // '/wss':{
-      //   target:'http://192.168.0.86:8080',
-      //   pathRewrite: {
-      //     '^/wss': ''
-      //   },
-      //   changeOrigin: true,
-      //   ws:true,
-      //   logLevel: 'debug'
-      // }
     },
 
     // Various Dev Server settings
@@ -44,7 +36,7 @@ module.exports = {
      */
 
     // https://webpack.js.org/configuration/devtool/#development
-    // devtool: 'eval-source-map',
+    devtool: 'eval-source-map',
 
     // If you have problems debugging vue-files in devtools,
     // set this to false - it *may* help

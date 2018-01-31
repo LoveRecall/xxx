@@ -115,7 +115,7 @@
       this.getAcct();  
       let _this = this;   
       let data = '';
-      let ws = new WebSocket('ws://192.168.0.86:8080/webSocketServer?custNo='+sessionStorage.getItem('custNo'));
+      let ws = new WebSocket('ws://192.168.0.174:8081/webSocketServer?custNo='+sessionStorage.getItem('custNo'));
       ws.onopen = function (evt) {
         //已经建立连接
         console.log('已经建立连接')
@@ -195,7 +195,6 @@
         .then(response => {
           let data = response.data;
           _this.acctAmt = data.t.acctAmt;
-          sessionStorage.setItem('acctAmt',data.t.acctAmt);
         })
         .catch(error => {
 

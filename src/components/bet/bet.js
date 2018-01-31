@@ -5,21 +5,28 @@ import fiveStarRepet from './module/fiveStarRepet/index.vue' //五星复式法�
 import before2single from './module/before-2-single/index.vue' //前二玩法
 export default {
   data() {
+    const playkindFunIndex_ = function(){
+      let playkindFunIndex = sessionStorage.getItem('playkindFunIndex');
+      playkindFunIndex =  typeof playkindFunIndex == 'object' || playkindFunIndex =='null' || playkindFunIndex ==null ? '{ "_index": 0, "index": 0 }' : playkindFunIndex;
+      return JSON.parse(playkindFunIndex);
+    };
     return {  
-      DataNumChoiceCode:window.location.hash.substr(window.location.hash.indexOf('=')+1,window.location.hash.length),//获得保存的编码
+      acctAmt:0,//账户余额
+      DataNumChoiceCode:window.location.href.substr(window.location.href.indexOf('=')+1,window.location.href.length),//获得保存的编码
       allChoiceYard:0,//共选多少注（选择号码时）
       totalChoiceYard:0,//共选多少注（投注列表 即为所有的选择注数）
       allPutMoney:0,//共投多少元（选择号码时）
       totalChoiceMoney:0,//共投多少元（投注列表 即为所有的选择注数的金额）
-      allGetProfit:0, //共获得多少利润
+      allGetProfit:0, //当前彩种奖金
+      estimateProfit:0,//共获得多少利润
       codeNumYardArr:null, //当前页面选择投注的号码 组合
       kindCheckedIndex:0, //彩种玩法下标
-      playkindFunIndex:JSON.parse(sessionStorage.getItem('playkindFunIndex')), //彩种玩法下标(小玩法  用于刷新定位)
+      playkindFunIndex:playkindFunIndex_(), //彩种玩法下标(小玩法  用于刷新定位)
       DataNumChoice:[], //后台传入的 选择号码数据 
       allYardList:[], //投注列表
       btnConfirmChoice:true, //确认选号按钮
       btnImmediately:true, //立即下注按钮
-      gameOpenNo:'',//最新一期开奖结果
+      gameOpenNos:'',//最新一期开奖结果
       getGameNextOpenNodata:[],//查询游戏下一期情况(用于投注)
       getGameGroupByGameWithGroupdata:[
 
@@ -75,50 +82,37 @@ export default {
             key: '状态'
           },
       ],
-      data1: [
-         
-      ],
-      chaseareatableTd:[ //追号表格td 数据
-        {
-          number: '20180118031',
-          addTimes: 1,
-          currCost: '3',
-          stopTime: '2018-01-17 12:00:00',
-        },
-        {
-          number: '20180118032',
-          addTimes: 1,
-          currCost: '3',
-          stopTime: '2018-01-17 12:00:00',
-        },
-        {
-          number: '20180118033',
-          addTimes: 1,
-          currCost: '3',
-          stopTime: '2018-01-17 12:00:00',
-        },
-        {
-          number: '20180118034',
-          addTimes: 1,
-          currCost: '3',
-          stopTime: '2018-01-17 12:00:00',
-        }],       
+      data1: [],
+      superadditionBetList:[],//追号投入数据（用于数据传参）
+      chaseareatableTd:[], //追号表格td 数据   
+      officialjump:false, //官方跳开
+      officialStop:false, //中奖停止追号
+      chaseIsShow:false,//追号弹出框 控制参数
       chaseinitTimes:1, //追号起始倍数
-      aliketimesChase:false,//控制同倍  翻倍 追号切换显示       
+      aliketimesChase:true,//控制同倍  翻倍 追号切换显示       
       intervalperiod:1, //翻倍间隔周期  
       intervaltimes:2, //翻倍追号 倍数
+      superadditionBetMoney:0,//追号总金额
       chaseSelect:10,//追号期数值
       chaseSelectList:[//追号期数 下拉
         {
+          label:'请选择',
+          value: 0,
+        },
+        {
+          label:'5期',
           value: 5,
         },
         {
+          label:'10期',
           value: 10,
         },
         {
+          label:'15期',
           value: 15,
         },
         {
+          label:'20期',
           value: 20,
         },
       ],
@@ -127,7 +121,6 @@ export default {
       autoplay:false,
       autoPause:true,
       playSwitch:false,
-      chaseIsShow:false,//追号弹出框 控制参数
       audioSrc:'/static/audio/10.ogg',
       historyList:[],//开奖历史
       model1: 1, //模式 元 角 分 厘  
@@ -144,16 +137,31 @@ export default {
           value: 0.01,
           label: '分'
         },
-        {
-          value: 0.001,
-          label: '厘'
-        },
       ],
+      clock:null, 
     }
   },
   components:{
     XNumber,Group,swiper,swiperSlide,ButtonTab, ButtonTabItem,
     before2single,fiveStarRepet
+  },
+  filters:{
+    _Date(date,fmt) { //author: kangge
+      date = new Date(date);
+      var o = {
+        "M+": date.getMonth() + 1, //月份
+        "d+": date.getDate(), //日
+        "h+": date.getHours(), //小时
+        "m+": date.getMinutes(), //分
+        "s+": date.getSeconds(), //秒
+        "q+": Math.floor((date.getMonth() + 3) / 3), //季度
+        "S": date.getMilliseconds() //毫秒
+      };
+      if (/(y+)/.test(fmt)) fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+      for (var k in o)
+        if (new RegExp("(" + k + ")").test(fmt)) fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+      return fmt;
+    }
   },
   computed: {
     swiper() {
@@ -175,13 +183,26 @@ export default {
     },
   },
   mounted(){ 
+    this.getAcct();
     this.getGameLatestOpenNo();
     this.getGameNextOpenNo();   
     this.getGameGroupByGameWithGroup();
     this.getGameLatestOpenNoList();
   },
   methods: { 
-  //倍数加减
+    resetStatus(){ //状态重置函数
+      this.allYardList=[];
+      this.btnImmediately=true;
+      this.btnConfirmChoice=true;
+      this.allChoiceYard = 0;
+      this.allPutMoney = 0;
+      this.estimateProfit = 0;
+      this.add_times = 1;
+      this.model1 =1;
+    },
+    sortId(a,b){   //对象数组排序
+      return a.number-b.number  
+    },
     stop(){},//空方法
     mul(){  //解决JS 精度问题
       let m=0,s2='',strArr = 1;
@@ -200,6 +221,21 @@ export default {
       for(let k=0;k<i;k++){    //一维长度为i,i为变量，可以根据实际情况改变     
         this.codeNumYardArr[k]=new Array();  //声明二维，每一个一维数组里面的一个元素都是一个数组；     
       };
+    },
+    //查询账户消息
+    getAcct(){
+      let _this = this;
+      this.$http({
+        method: 'get',
+        url:'/getAcct',
+      })
+      .then(response => {
+        let data = response.data;
+        _this.acctAmt = data.t.acctAmt;
+      })
+      .catch(error => {
+
+      })
     },
     //退出登录
     loginOut () {
@@ -240,10 +276,12 @@ export default {
       .then(response => {
         let data = response.data;
         if(data.success){
-          this.historyList = data.list;
-          this.historyList.map(function(item){
-            item.gameOpenNo = item.gameOpenNo.replace(/(.)(?=[^$])/g,"$1,").split(",").join(',');
-          })
+          if(data.list.length>0){
+            this.historyList = data.list;
+            this.historyList.map(function(item){
+              item.gameOpenNo = item.gameOpenNo.replace(/(.)(?=[^$])/g,"$1,").split(",").join(',');
+            })
+          }
         }else{
 
         }
@@ -265,8 +303,8 @@ export default {
       .then(response => {
         let data = response.data;
         if(data.success){
-          this.gameOpenNo = data.t;
-          this.gameOpenNo.gameOpenNo = this.gameOpenNo.gameOpenNo.replace(/(.)(?=[^$])/g,"$1,").split(",");
+          this.gameOpenNos = data.t;
+          this.gameOpenNos.gameOpenNo = this.gameOpenNos.gameOpenNo.replace(/(.)(?=[^$])/g,"$1,").split(",");
         }else{
 
         }
@@ -300,8 +338,7 @@ export default {
       .then(response => {
         let data = response.data;
         if(data.success){
-          this.getGameNextOpenNodata = data.t;
-          let clock = $('.your-clock').FlipClock(parseInt(data.t.restTime),{
+          _this.clock = $('.your-clock').FlipClock(parseInt(data.t.restTime),{
             clockFace: 'HourMinuteCounter',
             countdown: true,
             autoStart: false,
@@ -310,8 +347,8 @@ export default {
               },
               interval:function(){
                 if(_this.autoPause){
-                  if(clock.getTime().time<10){ 
-                    _this.audioSrc = audioArr[clock.getTime().time];          
+                  if(_this.clock.getTime().time<10){ 
+                    _this.audioSrc = audioArr[_this.clock.getTime().time];          
                     _this.$refs.autoplay.load();
                     _this.$refs.autoplay.play();
                   }
@@ -321,7 +358,8 @@ export default {
               }
             }
           }); 
-          clock.start(); 
+          _this.clock.start(); 
+          this.getGameNextOpenNodata = data.t;
         }else{
 
         }
@@ -333,7 +371,6 @@ export default {
     //根据游戏查询所有有效游戏玩法(已分组)
     getGameGroupByGameWithGroup () {
       let _this = this;
-      let hash = window.location.hash;
       this.$http({
         method:'get',
         url:'/getGameGroupByGameWithGroup',
@@ -342,19 +379,22 @@ export default {
         }
       })
       .then(response => {
-        let data = response.data;
+        let data = response.data; 
+        let href = window.location.href;
         if(data.success){
-          this.getGameGroupByGameWithGroupdata = data.list;
+          _this.getGameGroupByGameWithGroupdata = data.list;
           let kind = ''; //默认选择第一条数据
-          if(hash.indexOf('#code=')>0){ //刷新页面
+          if(href.indexOf('#code=')>0){ //刷新页面
             this.kindCheckedIndex = sessionStorage.getItem('kindCheckedIndex');
-            kind = hash.substr(hash.indexOf('=')+1,hash.length);
+            kind = href.substr(href.indexOf('=')+1,href.length);
+            _this.allGetProfit = data.list[this.kindCheckedIndex].groupClassCones[this.playkindFunIndex._index].groupSettinges[this.playkindFunIndex.index].bonusAmt;
           }else{ //路由进入页面           
             sessionStorage.setItem('kindCheckedIndex',0);
             let playkindFunIndex = {_index:0,index:0};
             sessionStorage.setItem('playkindFunIndex',JSON.stringify(playkindFunIndex));
             kind = data.list[0].groupClassCones[0].groupSettinges[0].groupNo;
-            window.location.href = window.location.href+'#code='+kind;
+            _this.allGetProfit = data.list[0].groupClassCones[0].groupSettinges[0].bonusAmt;
+            window.location.href = href+'#code='+kind;           
           }
           this.DataNumChoice = ssc.data[kind];
           this.DataNumChoiceCode = kind; 
@@ -367,23 +407,88 @@ export default {
 
       })
     },
-    //查询某个彩种下属玩法
-    // get方式传参 是params 不是data
-    getGameByType () {
+    //游戏投注
+    gamebet(){
+      if(Number(this.acctAmt)<=0){
+        this.$Modal.error({
+          content:'您的余额不足,暂无法下注，请及时充值！'
+        })
+        return
+      }
       let _this = this;
+      let objArr=[];
+      let obj = null;
+      let gamePattern = null;
+      this.allYardList.map(function(item,index){
+        obj = {};
+        gamePattern = null;
+        obj.gameNo =  _this.$route.params.gameNo;
+        obj.groupNo =  _this.getGameGroupByGameWithGroupdata[_this.kindCheckedIndex].groupClassCones[_this.playkindFunIndex._index].groupSettinges[_this.playkindFunIndex.index].groupNo;
+        obj.betContent = item.YardNum;
+        obj.betMultiple = item.YardTimes;
+        obj.betNumber = item.YardCount;
+        obj.betAmt = item.YardMoney;
+        obj.estimateProfit = _this.allGetProfit-item.YardMoney;
+        if( _this.model1==1){
+          gamePattern=0
+        }else if( _this.model1==0.1){
+          gamePattern=1
+        }else if( _this.model1==0.01){
+          gamePattern=2
+        }
+        obj.gamePattern = gamePattern;
+        objArr.push(obj)
+      });
+      this.allYardList = [];
       this.$http({
         method:'post',
-        url:'/getGameByType',
-        params:{
-          gameType:this.$route.params.gameType
-        }
+        url:'/game/bet',
+        headers: {
+          'Content-Type': 'application/json;charset=UTF-8'
+        },
+        data:objArr
       })
       .then(response => {
         let data = response.data;
+        this.textAreaV='';
+        let content = '';
         if(data.success){
-          
+          content='投注成功'
         }else{
+          content =data.msg;
+        }
+        _this.$Modal.warning({
+          content:content
+        })
+      })
+      .catch(error => {
 
+      })
+    },
+    //查询当前追投列表
+    getGameNextOpenNoLists(){
+      let _this =this;
+      this.$Message.loading({content:'加载中...'})
+      this.$http({
+        method:'get',
+        url:'/gameOpenNo/getGameNextOpenNoList',
+        params:{
+          gameNo:this.$route.params.gameNo,
+          size:10,
+        },
+      })
+      .then(response => {
+        _this.$Message.destroy();
+        let data = response.data;
+        if(data.success){
+          data.list.map(function(item,index){
+            _this.chaseareatableTd[index] = item;
+            _this.chaseareatableTd[index].addTimes =0;
+            _this.chaseareatableTd[index].currCost =0;
+          })
+          this.chaseIsShow=true;
+        }else{
+          
         }
       })
       .catch(error => {
@@ -392,11 +497,13 @@ export default {
     },
     //玩法列表
     kindbarList(item,index){
+      this.resetStatus();
       let href = window.location.href;
       this.kindCheckedIndex = index;
       sessionStorage.setItem('kindCheckedIndex',index);
       let playkindFunIndex = {_index:0,index:0};
       this.playkindFunIndex =playkindFunIndex;
+      this.allGetProfit = this.getGameGroupByGameWithGroupdata[this.kindCheckedIndex].groupClassCones[this.playkindFunIndex._index].groupSettinges[this.playkindFunIndex.index].bonusAmt;
       sessionStorage.setItem('playkindFunIndex',JSON.stringify(playkindFunIndex));
       $('.play-item-list-panel .play_kind_list').removeClass('active').eq(0).addClass('active');
       let kind = this.getGameGroupByGameWithGroupdata[index].groupClassCones[0].groupSettinges[0].groupNo //默认选择第一条数据
@@ -407,7 +514,9 @@ export default {
     },
     //单个玩法 投注（即大类下的小分类）
     playkindFun(e,groupNo,_index,index){
+      this.resetStatus();
       let playkindFunIndex = {_index:_index,index:index};
+      this.allGetProfit = this.getGameGroupByGameWithGroupdata[this.kindCheckedIndex].groupClassCones[playkindFunIndex._index].groupSettinges[playkindFunIndex.index].bonusAmt;
       sessionStorage.setItem('playkindFunIndex',JSON.stringify(playkindFunIndex));
       let href = window.location.href;
       $('.play_kind_list').removeClass('active');
@@ -422,26 +531,124 @@ export default {
       this.allYardList.splice(index,1)
     },
     //追号列表 item 选中
-    checkboxedself(e){
-      let my = $(e.target).parents('tr').find('.ivu-checkbox-input');
+    checkboxedself(e,index){
+      this.changeCheckStatus(e,index,e.target.checked)
+    },
+    chaseaItemFun(e,index){  //点击整个列表选中
+      let my = $(e.target).parents('.ivu-checkbox-tr').find('.ivu-checkbox-input');
       my.get(0).checked = !my.get(0).checked;
-      if(my.get(0).checked){
-        my.parents('.ivu-checkbox').addClass('ivu-checkbox-checked')
+      this.changeCheckStatus(e,index,my.get(0).checked)
+    },
+    //改变复选框状态
+    changeCheckStatus(e,index,checked,input){
+      if(this.chaseinitTimes<=0){
+        this.chaseinitTimes=1;
+      }
+      let _this = this;
+      let my = $(e.target).parents('.ivu-checkbox-tr').find('.ivu-checkbox-input');
+      if(checked){
+        if(this.chaseareatableTd[index].addTimes<=0){
+          this.chaseareatableTd[index].addTimes=parseInt(this.chaseinitTimes);
+        }
+        this.chaseareatableTd[index].currCost=this.mul(this.totalChoiceMoney,this.chaseareatableTd[index].addTimes);
+        this.superadditionBetList.push(this.chaseareatableTd[index]);  
+        this.superadditionBetList = Array.from(new Set(this.superadditionBetList)); //去重操作 
+        this.superadditionBetList = this.superadditionBetList.sort(this.sortId); //数组排序
+        this.doubleUpdate(input);
+        my.parents('.ivu-checkbox').addClass('ivu-checkbox-checked');
       }else{
+        this.chaseareatableTd[index].addTimes=0;
+        this.chaseareatableTd[index].currCost=0;
+        this.superadditionBetList.map(function(item,itemindex){
+          if(item.number==_this.chaseareatableTd[index].number){
+            _this.superadditionBetList.splice(itemindex,1);
+            _this.doubleUpdate(input);
+          }
+        })   
         my.parents('.ivu-checkbox').removeClass('ivu-checkbox-checked')
       }
     },
-    chaseaItemFun(e){  //点击整个列表选中
-      this.checkboxedself(e)
+    //翻倍追号 操作修改数据 
+    doubleUpdate(input){
+      let _this =this;
+      if(input!='input'){ //判断在翻倍模式中 是否是用户 在自定义倍数
+        if(!this.aliketimesChase){
+          if(this.superadditionBetList.length>=1){
+            //通过排序 循环匹配 匹配到了 _this.chaseareatableTd 值
+            this.superadditionBetList.map(function(item,itemindex){
+              _this.chaseareatableTd.map(function(_item,_itemindex){
+                if(item==_item){
+                  if(itemindex<_this.intervalperiod){
+                    _item.addTimes = _this.chaseinitTimes;
+                  }else{ 
+                    _item.addTimes = _this.intervaltimes*_this.superadditionBetList[itemindex-_this.intervalperiod].addTimes;
+                  }
+                }
+                _item.currCost=_this.mul(_this.totalChoiceMoney,_item.addTimes);
+              })
+            }) 
+          }        
+        }
+      }
     },
+    //不能使用v-model 手动修改
+    changeChaseareaAddTimes(index,e){
+      let _this =this;
+      this.chaseareatableTd[index].addTimes = parseInt(e.target.value);
+      let my = $(e.target).parents('.ivu-checkbox-tr').find('.ivu-checkbox-input');
+      let checked =null;
+      if(parseInt(e.target.value)<=0||e.target.value==''){
+        checked = false;
+      }else{
+        checked = true;
+      }
+      my.get(0).checked = checked;
+      _this.changeCheckStatus(e,index,checked,'input')
+    },
+    //生成追号计划
+    generatePlan(){
+      this.superadditionBetList=[];
+      $('.ivu-checkbox-table .ivu-checkbox').removeClass('ivu-checkbox-checked');
+      this.chaseareatableTd.map(function(item){item.addTimes=0;item.currCost=0});
+      $('.ivu-checkbox-table .ivu-checkbox-input').each(function(){      
+        $(this).get(0).checked = false;      
+      });
+      if(this.chaseinitTimes>0){
+        this.chaseSelect = this.chaseSelect>this.chaseareatableTd.length ? this.chaseareatableTd.length :this.chaseSelect;
+        for(let i =0;i<parseInt(this.chaseSelect);i++){ //生成期数
+          if(!this.aliketimesChase){ //翻倍
+            if(i<this.intervalperiod){
+              this.chaseareatableTd[i].addTimes = this.chaseinitTimes;
+            }else{
+              this.chaseareatableTd[i].addTimes=this.intervaltimes*this.chaseareatableTd[i-this.intervalperiod].addTimes;
+            }
+          }else{
+            this.chaseareatableTd[i].addTimes=this.chaseinitTimes;
+          }
+          this.chaseareatableTd[i].currCost=this.mul(this.totalChoiceMoney,this.chaseinitTimes);
+          this.superadditionBetList.push(this.chaseareatableTd[i]);  
+          $('.ivu-checkbox-table .ivu-checkbox-input').eq(i).get(0).checked = true;
+          $('.ivu-checkbox-table .ivu-checkbox').eq(i).addClass('ivu-checkbox-checked');
+        } 
+      }
+    },
+    aliketimesChasefun(arg){
+      if(arg == 'alike'){ //同倍追号
+        this.aliketimesChase = true;
+      }else{
+        this.aliketimesChase = false;
+      }
+    }
   },
   watch:{
     add_times(value){
       this.allPutMoney = this.mul(this.allChoiceYard,value,this.initCodeMoney,this.model1);
+      this.estimateProfit = this.allGetProfit - this.allPutMoney;
     },
     model1(value){
       //后面 同乘以 同除 为了去除js 浮点数 不精确的问题
       this.allPutMoney = this.mul(this.allChoiceYard,value,this.initCodeMoney,this.add_times);
+      this.estimateProfit = this.allGetProfit - this.allPutMoney;
     },
     allYardList(value){
       let _this = this;
@@ -451,6 +658,27 @@ export default {
         _this.totalChoiceYard+=item.YardCount;
         _this.totalChoiceMoney+=item.YardMoney;
       })  
+    },
+    // chaseareatableTd:{
+    //   handler(newValue, oldValue) {
+       
+    //   },
+    //   deep: true
+    // },
+    aliketimesChase(value){
+      this.superadditionBetList=[];
+      this.saveCountArr = [];
+      $('.ivu-checkbox-table .ivu-checkbox').removeClass('ivu-checkbox-checked');
+      this.chaseareatableTd.map(function(item){item.addTimes=0;item.currCost=0});
+      $('.ivu-checkbox-table .ivu-checkbox-input').each(function(){      
+        $(this).get(0).checked = false;
+      });
+    },
+    superadditionBetList(value){
+      this.superadditionBetMoney = 0;
+      for(let i=0;i<value.length;i++){
+        this.superadditionBetMoney += value[i].addTimes*this.totalChoiceMoney;
+      }
     }
   },
   beforeRouteLeave(to, from, next){

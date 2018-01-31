@@ -8,7 +8,7 @@ import 'iview/dist/styles/iview.css';    // 使用 CSS
 import axios from 'axios';
 import app from './axios.config';
 import store from './vuex/store';
-// import './directive';
+import './directive';
 const transformRequest = function (data) {
   let ret = ''
   for (let it in data) {
@@ -16,7 +16,6 @@ const transformRequest = function (data) {
       }
   return ret
 }
-
 Vue.prototype.$http = axios;
 Vue.prototype.$transformRequest = transformRequest;
 Vue.use(iView);
@@ -25,7 +24,7 @@ import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
 
 Vue.use(ElementUI)
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 /* eslint-disable no-new */
 new Vue({
   el: '#app',

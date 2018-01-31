@@ -25,7 +25,7 @@
               <span>账号:</span><span v-text="custName"></span>
             </div>
             <div class="item">
-              <span>余额:</span><span v-text="acctAmt"></span>
+              <span>余额:</span><span v-if="acctAmt" v-text="acctAmt+'元'"></span>
             </div>
             <div class="item" @click="$router.push('/homeView/lobby')">返回大厅</div>
             <div class="item" @click="loginOut">退出登录</div>
@@ -104,7 +104,7 @@
             </router-link>
           </div>
           <div class="history-list-box">
-            <div class="history-list flex" :title="'期数：'+item.gameNumber+'；开奖号码：'+item.gameOpenNo" v-for="(item,index) in historyList">
+            <div v-if="historyList.length>0" class="history-list flex" :title="'期数：'+item.gameNumber+'；开奖号码：'+item.gameOpenNo" v-for="(item,index) in historyList">
               <div class="sort" v-text="index+1"></div>
               <div class="serial_number" v-text="item.gameNumber"></div>
               <div class="number" v-text="item.gameOpenNo"></div>
@@ -116,15 +116,15 @@
         <div class="award-result flex">
           <div class="flex">
             <div class="result flex">
-              <div class="ball-panel flex">
-                <p v-for="(item,index) in gameOpenNo.gameOpenNo" :key="index" v-text="item"></p>
+              <div class="ball-panel flex" v-if="gameOpenNos">
+                <p v-for="(item,index) in gameOpenNos.gameOpenNo" :key="index" v-text="item"></p>
               </div>
-              <p>第<span v-text="gameOpenNo.gameNumber"></span>期开奖结果</p>
+              <p v-if="gameOpenNos">第<span v-text="gameOpenNos.gameNumber"></span>期开奖结果</p>
             </div>
             <div v-if="!getGameNextOpenNodata.gameNumber" class="result-countdown flex" style="color:#fff;">
               未找到下一期开奖数据！
             </div>
-            <div v-if="getGameNextOpenNodata.gameNumber" class="result-countdown flex">
+            <div v-if="getGameNextOpenNodata" class="result-countdown flex">
               <p class="result-countdown-tit">
                 <span>第</span>
                 <span style="color:#ffb508;" v-text="getGameNextOpenNodata.gameNumber"></span>
@@ -144,7 +144,7 @@
         </div>
         <div class="play-box">
           <div class="play-bar flex">
-            <div class="play-item flex">
+            <div v-if="getGameGroupByGameWithGroupdata.length>0" class="play-item flex">
               <p v-for="(item,index) in getGameGroupByGameWithGroupdata" 
                  :key="index" 
                  v-text="item.groupClassName" 
@@ -168,12 +168,21 @@
                   v-text="items.groupName"></p>
               </div>
             </div>
-          </div>
+          </div>                 
           <!-- 不同玩法 加载不同模块   注：同一玩法可能有相同的模板 -->
-          <!--五星复式-->     
-          <fiveStarRepet v-if="this.DataNumChoiceCode == 111155001122" ref="fiveStarRepet"></fiveStarRepet> 
-          <!-- 前二-->
-          <before2single v-if="this.DataNumChoiceCode == 111122111111" ref="before2single"></before2single> 
+          <!--模板1-->   
+          <fiveStarRepet 
+            v-if="DataNumChoiceCode == 111155001122 || //五星直选复式
+                  DataNumChoiceCode == 111122111122  //前二直选复式
+            " 
+            ref="fiveStarRepet">
+          </fiveStarRepet> 
+          <!--模板2-->   
+          <before2single 
+            v-if="DataNumChoiceCode == 111122111111  //前二直选单式
+            " 
+            ref="before2single">
+          </before2single>  
           <!-- 不同玩法 加载不同模块 -->
           <!-- 表格 -->
           <div class="table-box">
@@ -219,26 +228,26 @@
               <div class="operation-btn-box flex">
                 <div class="flex align-items-c" style="justify-content: space-between;width:100%;">
                   <div>
-                    <Button type="warning" @click="chaseIsShow=true" :disabled="allYardList.length<=0">
+                    <Button type="warning"  @click="getGameNextOpenNoLists" :disabled="allYardList.length<=0">
                         <Icon type="android-share-alt"></Icon>
                         我要追号
                     </Button>
                   </div>
                   <div>
                     <p>
-                      <Checkbox>
+                      <Checkbox v-model="officialjump">
                         <span style="margin-left:2px;">官方跳开即停</span>
                       </Checkbox>
                     </p>
                     <p>
-                      <Checkbox>
+                      <Checkbox v-model="officialStop">
                         <span style="margin-left:2px;">中奖后停止追号</span>
                       </Checkbox>
                     </p>
                   </div>
                 </div>
                 <div style="width:100%;margin-top:10px;">
-                  <Button style="width:100%;" type="warning" :disabled="allYardList.length<=0">
+                  <Button @click="gamebet" style="width:100%;" type="warning" :disabled="allYardList.length<=0">
                     <Icon type="ios-checkmark-outline"></Icon>
                       确认下注
                   </Button>
@@ -255,7 +264,7 @@
                 </div>
               </div>
               <div class="play-record-table">
-                <Table :columns="columns1" :data="data1"></Table>
+                <Table width="auto" :columns="columns1" :data="data1"></Table>
               </div>
             </div>
           </div>        
@@ -297,40 +306,44 @@
       <div class="chasearea">
         <div class="chasearea-tit">
           <button-tab>
-            <button-tab-item @on-item-click="aliketimesChase=false" selected>同倍追号</button-tab-item>
-            <button-tab-item @on-item-click="aliketimesChase=true">翻倍追号</button-tab-item>
+            <button-tab-item @on-item-click="aliketimesChasefun('alike')" selected>同倍追号</button-tab-item>
+            <button-tab-item @on-item-click="aliketimesChasefun">翻倍追号</button-tab-item>
           </button-tab>
         </div>
         <div class="item-1 flex align-items-c">
           <div style="width:500px;" class="flex align-items-c">
             <p>追号计划：</p>
-            <p v-if="aliketimesChase">
-              每隔：<input type="text" :value="intervalperiod"/>期
-              x <input type="text" :value="intervaltimes"/> 倍
+            <p v-if="!aliketimesChase">
+              每隔：<input type="text" v-integer v-model="intervalperiod"/>期
+              x <input type="text" v-integer v-model="intervaltimes"/> 倍
             </p>
             <p style="margin:0 10px;">
-              起始倍数 <input type="text"  :value="chaseinitTimes"/>
-              追号期数 <input type="text" v-model="chaseSelect"/>
+              起始倍数 <input type="text" v-integer v-model="chaseinitTimes"/>
+              追号期数 <input type="text" v-integer v-model="chaseSelect"/>
             </p>
           </div>
           <p>
-            <Checkbox>
-              <span>官方跳开即停</span>
+            <Checkbox v-model="officialjump">
+              <span style="margin-left:2px;">官方跳开即停</span>
             </Checkbox>
           </p>
           <p>
-            <Checkbox>
-              <span>中奖后停止追号</span>
+            <Checkbox v-model="officialStop">
+              <span style="margin-left:2px;">中奖后停止追号</span>
             </Checkbox>
           </p>
         </div>
         <div class="item-2 flex align-items-c">
           <div style="width:590px;" class="flex align-items-c">
-            <p>追号期数：</p>
-            <p style="margin:0 15px;">追号总期数：<span style="color:#ffe400;">0</span></p>
-            <p>追号总金额：<span style="color:#ffe400;">0</span></p>
+            <p>追号期数：
+              <Select v-model="chaseSelect" style="width:80px">
+                <Option v-for="item in chaseSelectList" :value="item.value" :key="item.value">{{ item.label }}</Option>
+              </Select>
+            </p>
+            <p style="margin:0 15px;">追号总期数：<span style="color:#ffe400;" v-text="superadditionBetList.length"></span></p>
+            <p>追号总金额：<span style="color:#ffe400;" v-text="superadditionBetMoney"></span></p>
           </div>
-          <p><Button type="warning">生成追号计划</Button></p>
+          <p><Button type="warning" @click="generatePlan">生成追号计划</Button></p>
         </div>
         <div class="item-form">
            <table cellspacing="0" cellpadding="0" border="0">
@@ -342,20 +355,20 @@
             </tr>
           </table>
           <div style="max-height:210px;overflow:auto;">
-            <table cellspacing="0" cellpadding="0" border="0">
-              <tr @click="chaseaItemFun($event)" v-for="(item,index) in chaseareatableTd" :key="index">
+            <table class="ivu-checkbox-table" v-if="chaseareatableTd.length>0" cellspacing="0" cellpadding="0" border="0">
+              <tr class="ivu-checkbox-tr" @click="chaseaItemFun($event,index)" v-for="(item,index) in chaseareatableTd" :key="index">
                 <td>
                   <span class="ivu-checkbox">   
                     <span class="ivu-checkbox-inner"></span>
-                    <input type="checkbox" @click="checkboxedself($event)" class="ivu-checkbox-input">
+                    <input type="checkbox" @click.stop="checkboxedself($event,index)" class="ivu-checkbox-input">
                   </span>
-                  <span v-text="item.number" class="vertical-m"></span>
+                  <span v-text="item.gameNumber" class="vertical-m"></span>
                 </td>
                 <td>
-                  <input @click.stop="stop" type="text" :value="item.addTimes"> 倍
+                  <input @click.stop="stop" v-integer type="text" :value="item.addTimes" @input="changeChaseareaAddTimes(index,$event)"> 倍
                 </td>
                 <td v-text="'￥'+item.currCost"></td>
-                <td v-text="item.stopTime"></td> 
+                <td>{{item.stopSaleDt | _Date('yyyy-MM-dd hh:mm:ss')}}</td> 
               </tr>
             </table>
           </div>
@@ -363,7 +376,8 @@
       </div>
       <div slot="footer" class="flex">
         <Button type="error" size="large" long>清空追号</Button>
-        <Button type="error" size="large" long>直接投注</Button>
+        <Button type="error" size="large" v-if="superadditionBetList.length>0" long>追号投注</Button>
+        <Button type="error" size="large" v-else long @click="gamebet">直接投注</Button>
         <Button type="error" size="large" @click="chaseIsShow=false" long>取消</Button>
       </div>
     </Modal>

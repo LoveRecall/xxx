@@ -2,8 +2,9 @@
   <div>
     <div class="play-content">
       <div class="play-content-list flex" v-for="(itemWarp,DataNumIndex) in this.$parent.DataNumChoice.sub" :key="DataNumIndex">
-        <div class="label">
-          <span v-text="itemWarp.unit"></span>
+        <div class="label flex">
+          <p class="iconfont icon-decoration_icon"></p>
+          <p v-text="itemWarp.unit"></p>
         </div>
         <div class="ball-panel flex">
           <div v-for="(item,index) in itemWarp.golbal[1]" :key="index">
@@ -21,7 +22,7 @@
           <p @click="quickChoice($event,DataNumIndex)">清</p>
         </div>
       </div>
-      <div style="align-items: center;" class="flex">
+      <!-- <div style="align-items: center;" class="flex">
         <div>后三码:</div>
         <div>后三直选复式</div>
         <div style="margin-left:20px;">
@@ -33,14 +34,14 @@
           </Checkbox>
         </div>
         <br>
-      </div>
+      </div> -->
     </div>
     <!-- 加倍区 -->
     <div class="add-area-box">
       <div class="add-area flex">
         <div class="flex align-items-c add-panel">
           <p @click="updata_add_times('sub')" class="add"><i class="iconfont icon-jianhao"></i></p>
-          <input v-model="this.$parent.add_times" onkeyup="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" onafterpaste="if(this.value.length==1){this.value=this.value.replace(/[^1-9]/g,'')}else{this.value=this.value.replace(/\D/g,'')}" class="add_v" type="text">
+          <input :value="this.$parent.add_times" @input="updata_add_times($event)" v-integer class="add_v" type="text">
           <p @click="updata_add_times('add')" class="add"><i class="iconfont icon-iconjia"></i></p>
         </div>       
         <p style="margin:0 2px;">倍</p>
@@ -50,17 +51,17 @@
               <Option v-for="item in this.$parent.modelList" :value="item.value" :key="item.value">{{ item.label }}</Option>
           </Select>
         </div>
-        <div class="silder">
+        <!-- <div class="silder">
           <div>
             <Slider v-model="$store.state.silderVal" :step="1"></Slider>
           </div>
-        </div>
+        </div> -->
         <div class="flex showChip">
-          <p>{{$store.state.silderVal}}</p>
+          <!-- <p>{{$store.state.silderVal}}</p> -->
           <p>
             共选<span style="color:#da4040;" v-text="this.$parent.allChoiceYard"></span>注；
             共投<span style="color:#da4040;" v-text="this.$parent.allPutMoney"></span>元，
-            盈利<span style="color:#da4040;" v-text="this.$parent.allGetProfit"></span>元
+            盈利<span style="color:#da4040;" v-text="this.$parent.estimateProfit"></span>元
           </p>
         </div>
         <div class="btn-group">
@@ -68,7 +69,7 @@
             <Icon type="ios-compose"></Icon>
             确认选号
           </Button>
-          <Button type="warning" :disabled="this.$parent.btnImmediately">
+          <Button type="warning"  @click="btnConfirmChoiceFun('atOnce')" :disabled="this.$parent.btnImmediately">
             <Icon type="android-checkbox-outline"></Icon>
             立即下注
           </Button>

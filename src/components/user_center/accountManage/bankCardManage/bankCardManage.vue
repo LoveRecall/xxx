@@ -11,47 +11,70 @@
     data () {
       return {
         noDataText:'暂无数据...',
-        columns: [
-          {
-              title: '开户名',
-              key: 'name',
-          },
-          {
-              title: '开户行',
-              key: 'bank'
-          },
-          {
-              title: '卡号',
-              key: 'num'
-          },
-          {
-              title: '状态',
-              key: 'status'
-          },
-          {
-              title: '绑定时间',
-              key: 'time'
-          }
-        ],
-        data: [
-          {
-            name: '林晓梅',
-            bank: '中国工商银行',
-            num: '6212***********7891',
-            status: '正常',
-            time: '2018-01-02 18:00:00'
-          }
-        ]
+        columns: [],
+        data: []
       }
     },
     methods: {
+      init() {
+        let _this = this;
+        _this.columns = [
+          {
+              title: '开户名',
+              key: 'bankAcctName',
+          },
+          {
+              title: '开户行',
+              key: 'bankName'
+          },
+          {
+              title: '卡号',
+              key: 'bankAcct'
+          },
+          {
+              title: '状态',
+              key: 'bankStatus',
+              render: function(index, obj) {
+                return obj.row.bankStatus == 1 ? "有效" : "无效";
+              }
+          },
+          {
+              title: '绑定时间',
+              key: 'insertDate',
+              render:function(index,obj) {
+                return obj.row.insertDate;
+              }
+          }
+        ];
+      },
       rowClassName (row, index) {
         if (index === 1) {
             return 'table_title';
         }
         return '';
+      },
+      getBank() {
+        let _this = this;
+        this.$http({
+          method:'get',
+          url:'/getBank'
+        }).then(response => {
+          let data = response.data;
+          if(data.success){
+            _this.data = data.list;
+          }else{
+
+          }
+        }).catch(error => {
+
+        })
+
       }
-    }
+    },
+    mounted(){
+      this.init();
+      this.getBank();
+    },
   }
 </script>
 <style lang="less">
